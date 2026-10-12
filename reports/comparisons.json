@@ -1,0 +1,2351 @@
+{
+  "metadata": {
+    "generated": "2026-10-12T18:37:30.469Z",
+    "runtime": "v26.4.0",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "experiments": {
+    "pathfinding": {
+      "config": {
+        "algorithm": "astar",
+        "problem": {
+          "rows": 10,
+          "cols": 16,
+          "cells": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "start": 65,
+          "goal": 78
+        },
+        "preset": "weighted",
+        "limit": 20000
+      },
+      "results": [
+        {
+          "algorithm": "bfs",
+          "label": "Breadth-first search",
+          "status": "solved",
+          "metrics": {
+            "expanded": 113,
+            "discovered": 123,
+            "maxFrontier": 13,
+            "pathLength": 13,
+            "pathCost": 93,
+            "executionMs": 0.5795999999999992
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 113,
+                "discovered": 123,
+                "maxFrontier": 13,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.7942999999999998
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 113,
+                "discovered": 123,
+                "maxFrontier": 13,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.5795999999999992
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 113,
+                "discovered": 123,
+                "maxFrontier": 13,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.5305
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 113,
+                "discovered": 123,
+                "maxFrontier": 13,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.5185000000000031
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 113,
+                "discovered": 123,
+                "maxFrontier": 13,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.6381000000000014
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 0.5185000000000031,
+          "timingMax": 0.7942999999999998
+        },
+        {
+          "algorithm": "dfs",
+          "label": "Depth-first search",
+          "status": "solved",
+          "metrics": {
+            "expanded": 130,
+            "discovered": 154,
+            "maxFrontier": 62,
+            "pathLength": 23,
+            "pathCost": 23,
+            "executionMs": 1.2873000000000019
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 130,
+                "discovered": 154,
+                "maxFrontier": 62,
+                "pathLength": 23,
+                "pathCost": 23,
+                "executionMs": 1.5380000000000003
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 130,
+                "discovered": 154,
+                "maxFrontier": 62,
+                "pathLength": 23,
+                "pathCost": 23,
+                "executionMs": 1.4268999999999998
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 130,
+                "discovered": 154,
+                "maxFrontier": 62,
+                "pathLength": 23,
+                "pathCost": 23,
+                "executionMs": 1.2873000000000019
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 130,
+                "discovered": 154,
+                "maxFrontier": 62,
+                "pathLength": 23,
+                "pathCost": 23,
+                "executionMs": 1.1585999999999999
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 130,
+                "discovered": 154,
+                "maxFrontier": 62,
+                "pathLength": 23,
+                "pathCost": 23,
+                "executionMs": 1.0229
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 1.0229,
+          "timingMax": 1.5380000000000003
+        },
+        {
+          "algorithm": "ucs",
+          "label": "Uniform-cost search",
+          "status": "solved",
+          "metrics": {
+            "expanded": 142,
+            "discovered": 152,
+            "maxFrontier": 15,
+            "pathLength": 19,
+            "pathCost": 19,
+            "executionMs": 0.8754999999999953
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 142,
+                "discovered": 152,
+                "maxFrontier": 15,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.9769000000000005
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 142,
+                "discovered": 152,
+                "maxFrontier": 15,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.8322999999999965
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 142,
+                "discovered": 152,
+                "maxFrontier": 15,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.8235000000000028
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 142,
+                "discovered": 152,
+                "maxFrontier": 15,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.8754999999999953
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 142,
+                "discovered": 152,
+                "maxFrontier": 15,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.9498000000000033
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 0.8235000000000028,
+          "timingMax": 0.9769000000000005
+        },
+        {
+          "algorithm": "greedy",
+          "label": "Greedy best-first",
+          "status": "solved",
+          "metrics": {
+            "expanded": 13,
+            "discovered": 39,
+            "maxFrontier": 26,
+            "pathLength": 13,
+            "pathCost": 93,
+            "executionMs": 0.21390000000000242
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 13,
+                "discovered": 39,
+                "maxFrontier": 26,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.24040000000000106
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 13,
+                "discovered": 39,
+                "maxFrontier": 26,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.21390000000000242
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 13,
+                "discovered": 39,
+                "maxFrontier": 26,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.16029999999999944
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 13,
+                "discovered": 39,
+                "maxFrontier": 26,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.13889999999999958
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 13,
+                "discovered": 39,
+                "maxFrontier": 26,
+                "pathLength": 13,
+                "pathCost": 93,
+                "executionMs": 0.43309999999999604
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 0.13889999999999958,
+          "timingMax": 0.43309999999999604
+        },
+        {
+          "algorithm": "astar",
+          "label": "A* search",
+          "status": "solved",
+          "metrics": {
+            "expanded": 69,
+            "discovered": 105,
+            "maxFrontier": 36,
+            "pathLength": 19,
+            "pathCost": 19,
+            "executionMs": 0.7239999999999966
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 69,
+                "discovered": 105,
+                "maxFrontier": 36,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.7582000000000022
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 69,
+                "discovered": 105,
+                "maxFrontier": 36,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.7149000000000001
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 69,
+                "discovered": 105,
+                "maxFrontier": 36,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.7239999999999966
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 69,
+                "discovered": 105,
+                "maxFrontier": 36,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.75
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "expanded": 69,
+                "discovered": 105,
+                "maxFrontier": 36,
+                "pathLength": 19,
+                "pathCost": 19,
+                "executionMs": 0.6742000000000061
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 0.6742000000000061,
+          "timingMax": 0.7582000000000022
+        }
+      ]
+    },
+    "optimization": {
+      "config": {
+        "algorithm": "hill",
+        "problem": {
+          "queens": [
+            0,
+            5,
+            0,
+            6,
+            7,
+            2,
+            6,
+            4
+          ]
+        },
+        "arrangement": "random",
+        "trialStarts": "current",
+        "seed": 42,
+        "temperature": 8,
+        "cooling": 0.98,
+        "limit": 300
+      },
+      "results": [
+        {
+          "algorithm": "hill",
+          "label": "Hill climbing",
+          "status": "plateau",
+          "metrics": {
+            "candidateEvaluations": 225,
+            "iterations": 4,
+            "currentScore": 1,
+            "bestScore": 1,
+            "worseAccepted": 0,
+            "executionMs": 0.05654999999999788
+          },
+          "runs": [
+            {
+              "seed": 42,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.08799999999999386
+              },
+              "timings": [
+                0.08800000000000097,
+                0.08799999999999386,
+                0.08630000000000138
+              ]
+            },
+            {
+              "seed": 43,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.07369999999999521
+              },
+              "timings": [
+                0.07369999999999521,
+                0.06410000000000338,
+                0.1687999999999974
+              ]
+            },
+            {
+              "seed": 44,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.06269999999999953
+              },
+              "timings": [
+                0.06509999999999394,
+                0.06269999999999953,
+                0.062199999999997146
+              ]
+            },
+            {
+              "seed": 45,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.06300000000000239
+              },
+              "timings": [
+                0.061599999999998545,
+                0.06300000000000239,
+                0.06980000000000075
+              ]
+            },
+            {
+              "seed": 46,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.06220000000000425
+              },
+              "timings": [
+                0.06220000000000425,
+                0.08419999999999561,
+                0.06110000000000326
+              ]
+            },
+            {
+              "seed": 47,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.058699999999994645
+              },
+              "timings": [
+                0.06400000000000006,
+                0.058699999999994645,
+                0.05729999999999791
+              ]
+            },
+            {
+              "seed": 48,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.05929999999999325
+              },
+              "timings": [
+                0.05640000000000356,
+                0.22680000000000433,
+                0.05929999999999325
+              ]
+            },
+            {
+              "seed": 49,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.056699999999999307
+              },
+              "timings": [
+                0.05660000000000309,
+                0.056699999999999307,
+                0.056699999999999307
+              ]
+            },
+            {
+              "seed": 50,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.05649999999999977
+              },
+              "timings": [
+                0.05570000000000164,
+                0.05740000000000123,
+                0.05649999999999977
+              ]
+            },
+            {
+              "seed": 51,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.05639999999999645
+              },
+              "timings": [
+                0.05639999999999645,
+                0.056100000000000705,
+                0.061599999999998545
+              ]
+            },
+            {
+              "seed": 52,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.057800000000000296
+              },
+              "timings": [
+                0.057800000000000296,
+                0.05649999999999977,
+                0.13640000000000185
+              ]
+            },
+            {
+              "seed": 53,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.05659999999999599
+              },
+              "timings": [
+                0.05740000000000123,
+                0.05659999999999599,
+                0.05640000000000356
+              ]
+            },
+            {
+              "seed": 54,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.04099999999999682
+              },
+              "timings": [
+                0.08160000000000167,
+                0.04099999999999682,
+                0.03420000000000556
+              ]
+            },
+            {
+              "seed": 55,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.0251000000000019
+              },
+              "timings": [
+                0.026600000000001955,
+                0.0251000000000019,
+                0.02499999999999858
+              ]
+            },
+            {
+              "seed": 56,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.02489999999999526
+              },
+              "timings": [
+                0.02489999999999526,
+                0.024799999999999045,
+                0.026200000000002888
+              ]
+            },
+            {
+              "seed": 57,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.029899999999997817
+              },
+              "timings": [
+                0.024799999999999045,
+                0.10140000000000526,
+                0.029899999999997817
+              ]
+            },
+            {
+              "seed": 58,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.02459999999999951
+              },
+              "timings": [
+                0.02559999999999718,
+                0.024099999999997124,
+                0.02459999999999951
+              ]
+            },
+            {
+              "seed": 59,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.024299999999996658
+              },
+              "timings": [
+                0.024299999999996658,
+                0.024299999999996658,
+                0.024500000000003297
+              ]
+            },
+            {
+              "seed": 60,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.024500000000003297
+              },
+              "timings": [
+                0.024500000000003297,
+                0.024500000000003297,
+                0.024099999999997124
+              ]
+            },
+            {
+              "seed": 61,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "plateau",
+              "metrics": {
+                "candidateEvaluations": 225,
+                "iterations": 4,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 0,
+                "executionMs": 0.02499999999999858
+              },
+              "timings": [
+                0.02499999999999858,
+                0.02559999999999718,
+                0.024399999999999977
+              ]
+            }
+          ],
+          "successRate": 0,
+          "trials": 20,
+          "timingMin": 0.024299999999996658,
+          "timingMax": 0.08799999999999386
+        },
+        {
+          "algorithm": "anneal",
+          "label": "Simulated annealing",
+          "status": "mixed",
+          "metrics": {
+            "candidateEvaluations": 301,
+            "iterations": 300,
+            "currentScore": 1,
+            "bestScore": 1,
+            "worseAccepted": 30.5,
+            "executionMs": 0.1480499999999978
+          },
+          "runs": [
+            {
+              "seed": 42,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 36,
+                "executionMs": 0.28540000000000276
+              },
+              "timings": [
+                0.2827000000000055,
+                0.48450000000000415,
+                0.28540000000000276
+              ]
+            },
+            {
+              "seed": 43,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 37,
+                "executionMs": 0.28020000000000067
+              },
+              "timings": [
+                0.4408999999999992,
+                0.28020000000000067,
+                0.26900000000000546
+              ]
+            },
+            {
+              "seed": 44,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 2,
+                "bestScore": 2,
+                "worseAccepted": 26,
+                "executionMs": 0.28589999999999804
+              },
+              "timings": [
+                0.2762999999999991,
+                0.5223999999999975,
+                0.28589999999999804
+              ]
+            },
+            {
+              "seed": 45,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 27,
+                "executionMs": 0.2844000000000051
+              },
+              "timings": [
+                0.2844000000000051,
+                0.355000000000004,
+                0.23259999999999792
+              ]
+            },
+            {
+              "seed": 46,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "solved",
+              "metrics": {
+                "candidateEvaluations": 286,
+                "iterations": 285,
+                "currentScore": 0,
+                "bestScore": 0,
+                "worseAccepted": 31,
+                "executionMs": 0.13519999999999754
+              },
+              "timings": [
+                0.1377999999999986,
+                0.13519999999999754,
+                0.12940000000000396
+              ]
+            },
+            {
+              "seed": 47,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 42,
+                "executionMs": 0.1548000000000016
+              },
+              "timings": [
+                0.1460000000000008,
+                0.2647000000000048,
+                0.1548000000000016
+              ]
+            },
+            {
+              "seed": 48,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 35,
+                "executionMs": 0.13949999999999818
+              },
+              "timings": [
+                0.14580000000000126,
+                0.13949999999999818,
+                0.13700000000000045
+              ]
+            },
+            {
+              "seed": 49,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 34,
+                "executionMs": 0.20980000000000132
+              },
+              "timings": [
+                0.23270000000000124,
+                0.14099999999999824,
+                0.20980000000000132
+              ]
+            },
+            {
+              "seed": 50,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 2,
+                "bestScore": 1,
+                "worseAccepted": 30,
+                "executionMs": 0.1635999999999953
+              },
+              "timings": [
+                0.1635999999999953,
+                0.14150000000000063,
+                0.2764000000000024
+              ]
+            },
+            {
+              "seed": 51,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 32,
+                "executionMs": 0.14279999999999404
+              },
+              "timings": [
+                0.13919999999999533,
+                0.15529999999999688,
+                0.14279999999999404
+              ]
+            },
+            {
+              "seed": 52,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 34,
+                "executionMs": 0.1612000000000009
+              },
+              "timings": [
+                0.1612000000000009,
+                0.2342999999999975,
+                0.14270000000000493
+              ]
+            },
+            {
+              "seed": 53,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "solved",
+              "metrics": {
+                "candidateEvaluations": 251,
+                "iterations": 250,
+                "currentScore": 0,
+                "bestScore": 0,
+                "worseAccepted": 29,
+                "executionMs": 0.1133000000000024
+              },
+              "timings": [
+                0.12079999999999558,
+                0.1133000000000024,
+                0.10929999999999751
+              ]
+            },
+            {
+              "seed": 54,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 2,
+                "bestScore": 2,
+                "worseAccepted": 26,
+                "executionMs": 0.18299999999999983
+              },
+              "timings": [
+                0.14330000000000354,
+                0.18299999999999983,
+                0.21999999999999886
+              ]
+            },
+            {
+              "seed": 55,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 29,
+                "executionMs": 0.15330000000000155
+              },
+              "timings": [
+                0.14399999999999835,
+                0.27939999999999543,
+                0.15330000000000155
+              ]
+            },
+            {
+              "seed": 56,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 25,
+                "executionMs": 0.14000000000000057
+              },
+              "timings": [
+                0.14000000000000057,
+                0.1349000000000018,
+                0.215600000000002
+              ]
+            },
+            {
+              "seed": 57,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "solved",
+              "metrics": {
+                "candidateEvaluations": 265,
+                "iterations": 264,
+                "currentScore": 0,
+                "bestScore": 0,
+                "worseAccepted": 30,
+                "executionMs": 0.11610000000000298
+              },
+              "timings": [
+                0.12300000000000466,
+                0.11610000000000298,
+                0.11269999999999669
+              ]
+            },
+            {
+              "seed": 58,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "solved",
+              "metrics": {
+                "candidateEvaluations": 193,
+                "iterations": 192,
+                "currentScore": 0,
+                "bestScore": 0,
+                "worseAccepted": 28,
+                "executionMs": 0.08539999999999992
+              },
+              "timings": [
+                0.09029999999999916,
+                0.08539999999999992,
+                0.08520000000000039
+              ]
+            },
+            {
+              "seed": 59,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "iteration-limit",
+              "metrics": {
+                "candidateEvaluations": 301,
+                "iterations": 300,
+                "currentScore": 1,
+                "bestScore": 1,
+                "worseAccepted": 30,
+                "executionMs": 0.14000000000000057
+              },
+              "timings": [
+                0.2160999999999973,
+                0.14000000000000057,
+                0.1266999999999996
+              ]
+            },
+            {
+              "seed": 60,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "solved",
+              "metrics": {
+                "candidateEvaluations": 213,
+                "iterations": 212,
+                "currentScore": 0,
+                "bestScore": 0,
+                "worseAccepted": 33,
+                "executionMs": 0.09329999999999927
+              },
+              "timings": [
+                0.09770000000000323,
+                0.09329999999999927,
+                0.08910000000000196
+              ]
+            },
+            {
+              "seed": 61,
+              "startingQueens": [
+                0,
+                5,
+                0,
+                6,
+                7,
+                2,
+                6,
+                4
+              ],
+              "status": "solved",
+              "metrics": {
+                "candidateEvaluations": 183,
+                "iterations": 182,
+                "currentScore": 0,
+                "bestScore": 0,
+                "worseAccepted": 33,
+                "executionMs": 0.0853000000000037
+              },
+              "timings": [
+                0.0853000000000037,
+                0.07920000000000016,
+                0.14300000000000068
+              ]
+            }
+          ],
+          "successRate": 0.3,
+          "trials": 20,
+          "timingMin": 0.0853000000000037,
+          "timingMax": 0.28589999999999804
+        }
+      ]
+    },
+    "game": {
+      "config": {
+        "algorithm": "alphabeta",
+        "problem": {
+          "board": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "turn": "X",
+          "ai": "O"
+        },
+        "position": "empty",
+        "ordering": "natural",
+        "limit": 1000000
+      },
+      "results": [
+        {
+          "algorithm": "minimax",
+          "label": "Minimax",
+          "status": "solved",
+          "metrics": {
+            "nodesEvaluated": 549946,
+            "terminalEvaluations": 255168,
+            "cutoffs": 0,
+            "searchDepth": 9,
+            "executionMs": 124.35000000000002
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 549946,
+                "terminalEvaluations": 255168,
+                "cutoffs": 0,
+                "searchDepth": 9,
+                "executionMs": 133.47519999999997
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 549946,
+                "terminalEvaluations": 255168,
+                "cutoffs": 0,
+                "searchDepth": 9,
+                "executionMs": 130.7804
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 549946,
+                "terminalEvaluations": 255168,
+                "cutoffs": 0,
+                "searchDepth": 9,
+                "executionMs": 116.69540000000006
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 549946,
+                "terminalEvaluations": 255168,
+                "cutoffs": 0,
+                "searchDepth": 9,
+                "executionMs": 124.35000000000002
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 549946,
+                "terminalEvaluations": 255168,
+                "cutoffs": 0,
+                "searchDepth": 9,
+                "executionMs": 122.94619999999998
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 116.69540000000006,
+          "timingMax": 133.47519999999997
+        },
+        {
+          "algorithm": "alphabeta",
+          "label": "Alpha-beta pruning",
+          "status": "solved",
+          "metrics": {
+            "nodesEvaluated": 18297,
+            "terminalEvaluations": 7330,
+            "cutoffs": 4237,
+            "searchDepth": 9,
+            "executionMs": 4.063499999999976
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 18297,
+                "terminalEvaluations": 7330,
+                "cutoffs": 4237,
+                "searchDepth": 9,
+                "executionMs": 7.321800000000053
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 18297,
+                "terminalEvaluations": 7330,
+                "cutoffs": 4237,
+                "searchDepth": 9,
+                "executionMs": 5.689800000000105
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 18297,
+                "terminalEvaluations": 7330,
+                "cutoffs": 4237,
+                "searchDepth": 9,
+                "executionMs": 3.8578999999999724
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 18297,
+                "terminalEvaluations": 7330,
+                "cutoffs": 4237,
+                "searchDepth": 9,
+                "executionMs": 4.063499999999976
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "nodesEvaluated": 18297,
+                "terminalEvaluations": 7330,
+                "cutoffs": 4237,
+                "searchDepth": 9,
+                "executionMs": 3.692099999999982
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 3.692099999999982,
+          "timingMax": 7.321800000000053
+        }
+      ]
+    },
+    "sudoku": {
+      "config": {
+        "algorithm": "forward",
+        "problem": {
+          "board": [
+            5,
+            0,
+            0,
+            0,
+            7,
+            0,
+            9,
+            1,
+            2,
+            6,
+            0,
+            0,
+            1,
+            0,
+            5,
+            3,
+            4,
+            8,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            6,
+            7,
+            8,
+            0,
+            9,
+            7,
+            0,
+            1,
+            4,
+            0,
+            3,
+            0,
+            0,
+            0,
+            8,
+            0,
+            3,
+            0,
+            0,
+            1,
+            7,
+            1,
+            0,
+            0,
+            2,
+            0,
+            8,
+            5,
+            6,
+            0,
+            6,
+            0,
+            5,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            8,
+            7,
+            4,
+            1,
+            9,
+            0,
+            3,
+            5,
+            0,
+            4,
+            0,
+            2,
+            0,
+            0,
+            1,
+            7,
+            9
+          ]
+        },
+        "puzzle": "easy",
+        "limit": 50000
+      },
+      "results": [
+        {
+          "algorithm": "backtracking",
+          "label": "Backtracking",
+          "status": "solved",
+          "metrics": {
+            "assignmentsAttempted": 81,
+            "backtracks": 13,
+            "valuesRemoved": 0,
+            "assigned": 81,
+            "total": 81,
+            "executionMs": 1.6295999999999822
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 81,
+                "backtracks": 13,
+                "valuesRemoved": 0,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.710299999999961
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 81,
+                "backtracks": 13,
+                "valuesRemoved": 0,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.9084000000000287
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 81,
+                "backtracks": 13,
+                "valuesRemoved": 0,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.6295999999999822
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 81,
+                "backtracks": 13,
+                "valuesRemoved": 0,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.4828999999999724
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 81,
+                "backtracks": 13,
+                "valuesRemoved": 0,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.6254000000000133
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 1.4828999999999724,
+          "timingMax": 1.9084000000000287
+        },
+        {
+          "algorithm": "forward",
+          "label": "Forward checking",
+          "status": "solved",
+          "metrics": {
+            "assignmentsAttempted": 41,
+            "backtracks": 5,
+            "valuesRemoved": 44,
+            "assigned": 81,
+            "total": 81,
+            "executionMs": 1.3205000000000382
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 41,
+                "backtracks": 5,
+                "valuesRemoved": 44,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.3190999999999349
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 41,
+                "backtracks": 5,
+                "valuesRemoved": 44,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.3205000000000382
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 41,
+                "backtracks": 5,
+                "valuesRemoved": 44,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.3478000000000065
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 41,
+                "backtracks": 5,
+                "valuesRemoved": 44,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.379099999999994
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 41,
+                "backtracks": 5,
+                "valuesRemoved": 44,
+                "assigned": 81,
+                "total": 81,
+                "executionMs": 1.1484000000000378
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 1.1484000000000378,
+          "timingMax": 1.379099999999994
+        }
+      ]
+    },
+    "timetable": {
+      "config": {
+        "algorithm": "forward",
+        "problem": {
+          "slots": [
+            "Mon 09:00",
+            "Mon 10:00",
+            "Tue 09:00"
+          ],
+          "rooms": [
+            {
+              "id": "R1",
+              "available": [
+                0,
+                1,
+                2
+              ]
+            },
+            {
+              "id": "R2",
+              "available": [
+                1,
+                2
+              ]
+            }
+          ],
+          "teachers": [
+            {
+              "id": "Ada",
+              "available": [
+                0,
+                1,
+                2
+              ]
+            },
+            {
+              "id": "Ben",
+              "available": [
+                1,
+                2
+              ]
+            }
+          ],
+          "sessions": [
+            {
+              "id": "MA1",
+              "name": "Math A · 1",
+              "teacher": "Ada",
+              "group": "A",
+              "rooms": [
+                "R1",
+                "R2"
+              ]
+            },
+            {
+              "id": "MA2",
+              "name": "Math A · 2",
+              "teacher": "Ada",
+              "group": "A",
+              "rooms": [
+                "R1",
+                "R2"
+              ]
+            },
+            {
+              "id": "PA",
+              "name": "Physics A",
+              "teacher": "Ben",
+              "group": "A",
+              "rooms": [
+                "R1"
+              ]
+            },
+            {
+              "id": "MB",
+              "name": "Math B",
+              "teacher": "Ada",
+              "group": "B",
+              "rooms": [
+                "R1",
+                "R2"
+              ]
+            },
+            {
+              "id": "PB",
+              "name": "Physics B",
+              "teacher": "Ben",
+              "group": "B",
+              "rooms": [
+                "R1"
+              ]
+            }
+          ]
+        },
+        "dataset": "feasible",
+        "limit": 10000
+      },
+      "results": [
+        {
+          "algorithm": "backtracking",
+          "label": "Backtracking",
+          "status": "solved",
+          "metrics": {
+            "assignmentsAttempted": 21,
+            "backtracks": 3,
+            "valuesRemoved": 0,
+            "assigned": 5,
+            "total": 5,
+            "executionMs": 0.09969999999998436
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 21,
+                "backtracks": 3,
+                "valuesRemoved": 0,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.09969999999998436
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 21,
+                "backtracks": 3,
+                "valuesRemoved": 0,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.098700000000008
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 21,
+                "backtracks": 3,
+                "valuesRemoved": 0,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.10910000000001219
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 21,
+                "backtracks": 3,
+                "valuesRemoved": 0,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.10860000000002401
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 21,
+                "backtracks": 3,
+                "valuesRemoved": 0,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.09409999999991214
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 0.09409999999991214,
+          "timingMax": 0.10910000000001219
+        },
+        {
+          "algorithm": "forward",
+          "label": "Forward checking",
+          "status": "solved",
+          "metrics": {
+            "assignmentsAttempted": 7,
+            "backtracks": 2,
+            "valuesRemoved": 13,
+            "assigned": 5,
+            "total": 5,
+            "executionMs": 0.08699999999998909
+          },
+          "runs": [
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 7,
+                "backtracks": 2,
+                "valuesRemoved": 13,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.08699999999998909
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 7,
+                "backtracks": 2,
+                "valuesRemoved": 13,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.08359999999993306
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 7,
+                "backtracks": 2,
+                "valuesRemoved": 13,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.08180000000004384
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 7,
+                "backtracks": 2,
+                "valuesRemoved": 13,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.08950000000004366
+              }
+            },
+            {
+              "status": "solved",
+              "metrics": {
+                "assignmentsAttempted": 7,
+                "backtracks": 2,
+                "valuesRemoved": 13,
+                "assigned": 5,
+                "total": 5,
+                "executionMs": 0.08799999999996544
+              }
+            }
+          ],
+          "successRate": 1,
+          "trials": 5,
+          "timingMin": 0.08180000000004384,
+          "timingMax": 0.08950000000004366
+        }
+      ]
+    }
+  }
+}
