@@ -6,6 +6,8 @@ A complete, browser-only educational project using HTML5, CSS3, vanilla JavaScri
 
 The interface uses a charcoal foundation, restrained copper accents, and self-hosted IBM Plex Sans and IBM Plex Mono fonts. Font files and the SIL Open Font License are included in `assets/fonts`; the page makes no external font requests. See [the design notes](docs/DESIGN.md) for the palette, type scale, and visualization conventions.
 
+Navigation, playback, and experiment actions use Phosphor Regular icons retrieved with the `better-icons` skill. The SVG sprite and MIT license are included in `assets/icons`; icons load locally, inherit the interface colors, and accompany visible text labels.
+
 ## Launch
 
 The app is deployed automatically to GitHub Pages whenever a commit is pushed to `main`. The workflow publishes the browser app, its local assets, and the project documentation. To enable or inspect deployment, open the repository’s **Settings → Pages** and choose **GitHub Actions** as the build and deployment source. Workflow status and deployment links are available in the **Actions** tab.

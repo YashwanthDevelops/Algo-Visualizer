@@ -17,3 +17,21 @@ button{border:1px solid #494540;border-radius:4px;background:#292725;color:var(-
 .lab-index{display:grid;grid-template-columns:minmax(340px,.9fr) minmax(0,1.1fr);gap:16px}.lab-feature{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line-soft);color:var(--text);min-width:0}.lab-feature:hover,.lab-row:hover{background:#242220;border-color:#675949;text-decoration:none}.lab-feature-map{height:210px;display:flex;justify-content:center;align-items:center;background:var(--inset);overflow:hidden}.lab-feature-map svg{height:100%;max-height:200px;width:auto;max-width:100%}.lab-feature-copy{padding:19px;display:flex;flex-direction:column;align-items:flex-start;flex:1}.lab-kind{font:11px var(--mono);color:var(--muted)}.lab-feature-copy h2{font-size:21px;margin:10px 0 6px}.lab-feature-copy p{font-size:14px;color:var(--muted);margin:0 0 14px}.lab-methods{font:11px var(--mono);color:var(--muted);line-height:1.8}.lab-open{width:100%;display:flex;justify-content:space-between;border-top:1px solid var(--line-soft);margin-top:auto;padding-top:13px;padding-bottom:1px;color:var(--accent);font-size:13px}.lab-list{display:flex;flex-direction:column;border-top:1px solid var(--line-soft)}.lab-row{display:grid;grid-template-columns:82px minmax(0,1fr) 20px;gap:14px;align-items:center;min-height:100px;padding:12px 10px;border-bottom:1px solid var(--line-soft);border-left:1px solid transparent;border-right:1px solid transparent;color:var(--text)}.lab-row-preview{width:82px;height:70px;display:flex;align-items:center;justify-content:center;background:var(--inset);overflow:hidden}.lab-row-preview svg{max-width:100%;max-height:100%;height:auto}.lab-row-copy{min-width:0;display:flex;flex-direction:column;gap:2px}.lab-row-title{font-size:15px;font-weight:500}.lab-row-description{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lab-row-arrow{color:var(--accent)}.dashboard-section{margin-top:34px}.section-intro{font-size:13px;color:var(--muted);margin:4px 0 0}.section-count{font:12px var(--mono);color:var(--muted)}
 @media(max-width:1050px){.lab-index{grid-template-columns:1fr}.lab-feature{display:grid;grid-template-columns:minmax(200px,.9fr) minmax(0,1.1fr)}.lab-feature-map{height:100%;min-height:210px}.lab-feature-map svg{height:auto;width:100%}}
 @media(max-width:760px){.lab-feature{grid-template-columns:1fr}.lab-feature-map{height:170px;min-height:170px}.lab-feature-map svg{height:100%;width:auto}.lab-row{grid-template-columns:64px minmax(0,1fr) 16px;gap:10px;padding:11px 4px}.lab-row-preview{width:64px;height:60px}.lab-row-description{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.lab-feature-copy{padding:16px}.hero{grid-template-columns:1fr;min-height:0;padding:24px 0 34px}}
+
+/* A single icon family for navigation and actions. Color follows the surrounding label. */
+.icon{display:inline-block;width:18px;height:18px;flex:0 0 auto;vertical-align:middle;color:inherit}
+button:has(>.icon),.button-link:has(>.icon),.with-icon{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.with-icon{justify-content:flex-start}.with-icon>.icon{color:var(--muted)}
+.nav-link .nav-icon{display:block;width:20px;height:20px;color:var(--muted)}
+.nav-link:hover .nav-icon{color:var(--text)}.nav-link.active .nav-icon{color:var(--accent)}
+.playback-buttons .icon,.brushes .icon,.small-button .icon{width:16px;height:16px}
+.brushes button{justify-content:flex-start;padding-left:9px}
+.sidebar-foot a{display:inline-flex;align-items:center;gap:6px}.sidebar-foot .icon{width:14px;height:14px}
+.select-chevron.icon{width:16px;height:16px;top:50%;right:13px;border:0;transform:translateY(-50%);color:var(--muted)}
+.select-control:focus-within .select-chevron.icon{color:var(--accent)}
+.lab-row-arrow .icon,.lab-open .icon{width:18px;height:18px}
+.lab-row:hover .lab-row-arrow,.lab-feature:hover .lab-open{color:var(--text)}
+.legend .icon{width:16px;height:16px;margin-right:4px;color:var(--text)}
+.legend>span:has(>.icon){display:inline-flex;align-items:center}
+.guide a{display:inline-flex;align-items:center;gap:6px}.guide a>.icon{width:14px;height:14px}
+@media(max-width:760px){.nav-link{gap:8px}.nav-link .nav-icon{width:17px;height:17px}}
