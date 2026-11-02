@@ -1,6 +1,6 @@
 # Search & Optimization Playground
 
-A complete, browser-only educational project using HTML5, CSS3, vanilla JavaScript, SVG, Web Workers, and LocalStorage. Five learning areas share recorded playback, a decision notebook, pseudocode highlighting, metrics, and reproducible comparisons. There are no frontend dependencies, network-loaded assets, paid APIs, server-side algorithms, or database.
+A complete educational project using HTML5, CSS3, vanilla JavaScript, SVG, Web Workers, and LocalStorage. Five learning areas share recorded playback, a decision notebook, pseudocode highlighting, metrics, and reproducible comparisons. Core algorithms run in the browser without runtime dependencies, network-loaded assets, or a database. The optional Question Visualizer uses a server-side Gemini image extraction API; see its setup and verification status below.
 
 **Live app:** [YashwanthDevelops.github.io/Algo-Visualizer](https://yashwanthdevelops.github.io/Algo-Visualizer/)
 
@@ -20,6 +20,8 @@ python -m http.server 8000 --bind 127.0.0.1
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Python serves static files only. All computation and storage happen in the browser. An existing static server, VS Code Live Server, or static hosting also works. Do not double-click `index.html`: ES modules and module workers require HTTP. Use a modern browser supporting ES modules, module workers, `structuredClone`, and LocalStorage.
 
+To use the Question Visualizer image extraction, run the Node server instead: copy `.env.example` to `.env`, set `GEMINI_API_KEY` there, then run `npm run dev` and open [http://127.0.0.1:8001](http://127.0.0.1:8001). Keep the key in the server environment; the Python static server and GitHub Pages do not provide the analysis API. See [Question Visualizer setup](docs/QUESTION_VISUALIZER.md) for Cloudflare Worker hosting and separate static-site configuration.
+
 Node.js is optional for development checks and the reproducible report:
 
 ```powershell
@@ -27,18 +29,22 @@ npm test
 node scripts/comparison-report.mjs
 ```
 
+The optional headless browser smoke check uses Playwright (a development-only dependency). Run `npm ci`, install Chromium with `npx playwright install chromium`, then run `npm run smoke:browser`. It checks pathfinding Run, Next, Previous, navigation, reload/persistence, and mobile overflow. Set `SMOKE_ARTIFACT_DIR` to save normal desktop, reduced-motion, and mobile screenshots. GitHub Actions runs this check and the algorithm tests before publishing.
+
 No `npm install` or build is needed. `npm start` is an alternative launch command when Python is installed. Stop the static server with Ctrl+C.
 
 ## Learning areas
 
 | Area | Working features |
 | --- | --- |
-| Pathfinding | BFS, DFS, Uniform-Cost, Greedy, A*; editable 10×16 map; walls and positive entry costs; start/goal; actual queue/stack/priority frontier; cell g/h/f and parent inspector; paths; weighted, maze, unreachable, blank presets |
-| Optimization | N-Queens (N = 4–12); hill climbing and simulated annealing; editable row arrangements; seed, temperature, cooling, iteration limit; candidate decisions; strict minima and plateaus; current/best conflict scores; SVG score chart; accepted worse moves |
-| Game AI | Playable Tic-Tac-Toe; either human side; full-depth Minimax; optional alpha-beta checkbox; natural or center-first ordering; expandable MAX/MIN tree with utility, alpha/beta, cutoffs, and bounds; tactical presets |
-| Sudoku | Editable standard 9×9 puzzle; teaching and classic presets; invalid and impossible examples; basic backtracking or forward checking; candidates, rejection, assignment, pruning, restoration, and backtracking |
+| Pathfinding | BFS, DFS, Uniform-Cost, Greedy, A*; adjustable 5–40 grid presets; walls and positive entry costs; Manhattan, Euclidean, or zero heuristic; frontier and path inspectors |
+| Optimization | N-Queens (N = 4–12); hill climbing and simulated annealing; seeded starts; optional hill-climbing sideways moves and random restarts; candidate decisions and score chart |
+| Game AI | Playable Tic-Tac-Toe; Minimax and alpha-beta; full or depth-limited search; bounded heuristic leaf values clearly marked as estimates; natural or center-first ordering |
+| Sudoku | Editable standard 9×9 puzzle; backtracking or forward checking; optional MRV with degree tie-break and least-constraining-value ordering |
 | Timetabling | Five-session teaching dataset; editable JSON; teacher, group, room, and availability constraints; backtracking and forward checking; assigned slot/room view; feasible and impossible presets |
 | Dashboard | Real comparisons within each lab; charts selectable by metric; configurations and history; restore complete inputs; JSON export; paired seeded trials and repeated timings |
+
+Optional controls retain the original defaults: pathfinding uses the Manhattan heuristic; hill climbing uses `sidewaysLimit = 0` and `restarts = 0`; CSP uses `variableOrdering = "fixed"` and `valueOrdering = "natural"`; and game search uses `depthLimit = 0` for full search. Set game depth to 1–9 for a bounded search; its leaves use an explicitly marked heuristic estimate rather than a proven terminal result. Optimization flags affect hill climbing; annealing continues to use its seeded proposal schedule.
 
 ### Common controls
 
@@ -110,4 +116,4 @@ The pathfinding grid has a fixed teaching size. CSP variable ordering is fixed (
 - [Actual verification results](docs/TEST_RESULTS.md)
 - [Development checklist](TASKS.md)
 
-The source is readable ES modules. Development tests use Node's built-in runner; the application does not require Node or a bundler.
+The source is readable ES modules. Algorithm tests use Node's built-in runner. Playwright is only used by the optional development smoke check; the application does not require Node or a bundler.

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.cloudflare.com/wrangler/config-schema.json",
+  "name": "question-visualizer-api",
+  "main": "api/worker.js",
+  "compatibility_date": "2026-11-02",
+  "vars": {
+    "GEMINI_MODEL": "gemini-3.6-flash",
+    "GEMINI_TIMEOUT_MS": "60000",
+    "ALLOWED_ORIGINS": "https://your-static-site.example"
+  }
+}

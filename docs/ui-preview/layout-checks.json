@@ -1,0 +1,182 @@
+[
+  {
+    "lab": "dashboard",
+    "overflowingControls": [],
+    "rootWidth": 305,
+    "width": 320
+  },
+  {
+    "lab": "pathfinding",
+    "overflowingControls": [],
+    "rootWidth": 305,
+    "width": 320
+  },
+  {
+    "lab": "optimization",
+    "overflowingControls": [],
+    "rootWidth": 305,
+    "width": 320
+  },
+  {
+    "lab": "game",
+    "overflowingControls": [],
+    "rootWidth": 305,
+    "width": 320
+  },
+  {
+    "lab": "sudoku",
+    "overflowingControls": [],
+    "rootWidth": 305,
+    "width": 320
+  },
+  {
+    "lab": "timetable",
+    "overflowingControls": [],
+    "rootWidth": 305,
+    "width": 320
+  },
+  {
+    "lab": "dashboard",
+    "overflowingControls": [],
+    "rootWidth": 360,
+    "width": 375
+  },
+  {
+    "lab": "pathfinding",
+    "overflowingControls": [],
+    "rootWidth": 360,
+    "width": 375
+  },
+  {
+    "lab": "optimization",
+    "overflowingControls": [],
+    "rootWidth": 360,
+    "width": 375
+  },
+  {
+    "lab": "game",
+    "overflowingControls": [],
+    "rootWidth": 360,
+    "width": 375
+  },
+  {
+    "lab": "sudoku",
+    "overflowingControls": [],
+    "rootWidth": 360,
+    "width": 375
+  },
+  {
+    "lab": "timetable",
+    "overflowingControls": [],
+    "rootWidth": 360,
+    "width": 375
+  },
+  {
+    "lab": "dashboard",
+    "overflowingControls": [],
+    "rootWidth": 399,
+    "width": 414
+  },
+  {
+    "lab": "pathfinding",
+    "overflowingControls": [],
+    "rootWidth": 399,
+    "width": 414
+  },
+  {
+    "lab": "optimization",
+    "overflowingControls": [],
+    "rootWidth": 399,
+    "width": 414
+  },
+  {
+    "lab": "game",
+    "overflowingControls": [],
+    "rootWidth": 399,
+    "width": 414
+  },
+  {
+    "lab": "sudoku",
+    "overflowingControls": [],
+    "rootWidth": 399,
+    "width": 414
+  },
+  {
+    "lab": "timetable",
+    "overflowingControls": [],
+    "rootWidth": 399,
+    "width": 414
+  },
+  {
+    "lab": "dashboard",
+    "overflowingControls": [],
+    "rootWidth": 753,
+    "width": 768
+  },
+  {
+    "lab": "pathfinding",
+    "overflowingControls": [],
+    "rootWidth": 753,
+    "width": 768
+  },
+  {
+    "lab": "optimization",
+    "overflowingControls": [],
+    "rootWidth": 753,
+    "width": 768
+  },
+  {
+    "lab": "game",
+    "overflowingControls": [],
+    "rootWidth": 753,
+    "width": 768
+  },
+  {
+    "lab": "sudoku",
+    "overflowingControls": [],
+    "rootWidth": 753,
+    "width": 768
+  },
+  {
+    "lab": "timetable",
+    "overflowingControls": [],
+    "rootWidth": 753,
+    "width": 768
+  },
+  {
+    "lab": "dashboard",
+    "overflowingControls": [],
+    "rootWidth": 1425,
+    "width": 1440
+  },
+  {
+    "lab": "pathfinding",
+    "overflowingControls": [],
+    "rootWidth": 1425,
+    "width": 1440
+  },
+  {
+    "lab": "optimization",
+    "overflowingControls": [],
+    "rootWidth": 1425,
+    "width": 1440
+  },
+  {
+    "lab": "game",
+    "overflowingControls": [],
+    "rootWidth": 1425,
+    "width": 1440
+  },
+  {
+    "lab": "sudoku",
+    "overflowingControls": [],
+    "rootWidth": 1425,
+    "width": 1440
+  },
+  {
+    "lab": "timetable",
+    "overflowingControls": [],
+    "rootWidth": 1425,
+    "width": 1440
+  }
+]

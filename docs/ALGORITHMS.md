@@ -12,13 +12,13 @@ Neighbors are north, east, south, west. DFS pushes in reverse to visit north fir
 | Greedy | Min-heap by estimated remaining `h` | Finds reachable goals on this finite duplicate-suppressed graph; no cost guarantee |
 | A* | Min-heap by `f = g + h` | Lowest total cost with the configured consistent heuristic |
 
-`h = (|row−goalRow| + |column−goalColumn|) × minimumTraversableEntryCost` is a lower bound because each move changes Manhattan distance by at most one. It also satisfies consistency across every legal edge. UCS/A* maintain best costs, update cheaper paths and parents, ignore stale heap entries, and check the goal after selection. Reopening cheaper states is supported. Admissibility alone requires appropriate reopening for general graph search; do not claim optimality with arbitrary heuristic/closed-set handling. [Berkeley informed search](https://inst.eecs.berkeley.edu/~cs188/textbook/search/informed.html)
+The default Manhattan heuristic is `(|row−goalRow| + |column−goalColumn|) × minimumTraversableEntryCost`. Euclidean distance uses the same scale; zero reduces A* to UCS. Each is admissible and consistent for four-direction movement with entry costs. UCS/A* maintain best costs, update cheaper paths and parents, ignore stale heap entries, and check the goal after selection. [Berkeley informed search](https://inst.eecs.berkeley.edu/~cs188/textbook/search/informed.html)
 
 ## N-Queens
 
 The arrangement is a row array indexed by column. Queens attack if their rows match or their row difference equals their column difference. Count each unordered pair once; score zero is solved.
 
-Hill climbing enumerates all `N(N−1)` single-column moves, takes the first best strictly improving move in column/row order, and stops when none improves. Equal-score alternatives are a plateau; all-worse neighbors indicate a strict local minimum. There are no hidden restarts or sideways moves.
+Hill climbing enumerates all `N(N−1)` single-column moves and takes the first best improving move in column/row order. Optional sideways allowance permits a bounded number of equal-score moves; optional restarts draw new boards from the seeded generator. Both default to zero, preserving the original behavior.
 
 Annealing proposes one uniformly indexed neighbor using Xorshift32. Improvements and equal scores are accepted. A worsening score by Δ is accepted when a seeded draw is below `exp(−Δ/T)`; then temperature is multiplied by cooling. Iteration and temperature limits are explicit, and current/best arrangements are separate. A finite run is not guaranteed to find a solution. [Berkeley local search](https://inst.eecs.berkeley.edu/~cs188/textbook/search/local.html)
 
@@ -28,11 +28,11 @@ Xorshift32 uses unsigned 32-bit seeds. Seed zero maps to a fixed nonzero state t
 
 X moves first. The AI is MAX; its opponent is MIN. Full-depth utility is +1 for an AI win, −1 for a loss, and 0 for a draw. MAX backs up the greatest child score; MIN backs up the least. Equal optimal moves use the configured ordering. Legal-state validation checks move counts and winning combinations.
 
-Alpha-beta propagates α (MAX's established lower bound) and β (MIN's established upper bound), skipping remaining siblings when α ≥ β. Root utility matches ordinary Minimax. Cutoff values are labeled lower/upper bounds, and pruned leaves have no invented terminal score. Move ordering changes the amount saved. There is no depth heuristic, transposition cache, or symmetry shortcut in this version. [Berkeley Minimax](https://inst.eecs.berkeley.edu/~cs188/textbook/games/minimax.html)
+Alpha-beta propagates α (MAX's established lower bound) and β (MIN's established upper bound), skipping remaining siblings when α ≥ β. Optional depth limits count plies from the current board. Nonterminal leaves use a bounded line-potential estimate in [-0.95, 0.95], marked `evaluated` and counted separately from proven terminal utility. A depth-limited move is an estimate, not a proof of the full-game outcome. [Berkeley Minimax](https://inst.eecs.berkeley.edu/~cs188/textbook/games/minimax.html)
 
 ## Constraint satisfaction
 
-Both models use fixed variable order and ordered domain values to isolate the effect of filtering. Initial domains respect immutable constraints. Backtracking tries a value, rejects conflicts with existing assignments, recursively completes the rest, and undoes failed assignments.
+Both models default to fixed variable order and natural domain values. Optional MRV selects the variable with the fewest currently legal values, breaking ties by degree; LCV tries the value that rules out the fewest neighbor values first. Initial domains respect immutable constraints. Backtracking tries a value, rejects conflicts with existing assignments, recursively completes the rest, and undoes failed assignments.
 
 Forward checking additionally removes values from unassigned related variables that conflict with the new assignment. Empty domains fail immediately. Each failed branch restores its previous domains exactly; cumulative pruning work stays counted. Forward checking is not AC-3 and does not enforce full arc consistency. [Berkeley filtering](https://inst.eecs.berkeley.edu/~cs188/textbook/csp/filtering.html)
 

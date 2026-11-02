@@ -1,0 +1,77 @@
+/* Hallmark · graphite, chalk, and muted olive, selected for the local redesign. */
+:root {
+  --color-paper: oklch(20.5% 0.004 110);
+  --color-paper-2: oklch(23.5% 0.004 110);
+  --color-paper-3: oklch(28% 0.005 110);
+  --color-canvas: oklch(18.5% 0.004 110);
+  --color-sidebar: oklch(22% 0.004 110);
+  --color-ink: oklch(94% 0.008 110);
+  --color-ink-2: oklch(73% 0.008 110);
+  --color-ink-3: oklch(64% 0.008 110);
+  --color-rule: oklch(34% 0.006 110);
+  --color-rule-soft: oklch(30% 0.005 110);
+  --color-control-rule: oklch(56% 0.006 110);
+  --color-accent: oklch(78% 0.075 112);
+  --color-accent-ink: oklch(22% 0.01 112);
+  --color-focus: var(--color-accent);
+  --color-success: oklch(79% 0.03 145);
+  --color-error: oklch(77% 0.072 25);
+  --color-selected: oklch(31% 0.012 112);
+  --color-cell-wall: oklch(34% 0.005 110);
+  --color-cell-weight: oklch(35% 0.021 112);
+  --color-cell-expanded: oklch(32% 0.006 110);
+  --color-cell-frontier: oklch(40% 0.012 150);
+  --color-cell-path: oklch(44% 0.042 112);
+  --color-cell-current: oklch(50% 0.065 112);
+  --color-cell-start: oklch(41% 0.035 155);
+  --color-cell-line: oklch(33% 0.006 110);
+  --color-board-light: oklch(31% 0.006 110);
+  --color-chart-rule: oklch(55% 0.008 110);
+  --color-accent-soft: color-mix(in oklch, var(--color-accent) 12%, transparent);
+  --color-error-soft: color-mix(in oklch, var(--color-error) 8%, transparent);
+  --color-shadow: oklch(12% 0.003 110 / 25%);
+
+  --font-display: Plex, 'Segoe UI', sans-serif;
+  --font-body: Plex, 'Segoe UI', sans-serif;
+  --font-mono: 'Plex Mono', ui-monospace, monospace;
+  --text-xs: .75rem;
+  --text-sm: .8125rem;
+  --text-base: .9375rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.5625rem;
+  --text-xl: 1.953125rem;
+  --text-display: clamp(1.953125rem, 2.8vw, 2.4414rem);
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --radius-control: 6px;
+  --radius-panel: 8px;
+  --rule-width: 1px;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-in: cubic-bezier(.7, 0, .84, 0);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 180ms;
+  --sidebar-width: 224px;
+
+  /* Existing renderer and stylesheet names continue to resolve to this system. */
+  --bg: var(--color-paper);
+  --surface: var(--color-paper-2);
+  --raised: var(--color-paper-3);
+  --inset: var(--color-canvas);
+  --line: var(--color-rule);
+  --line-soft: var(--color-rule-soft);
+  --text: var(--color-ink);
+  --muted: var(--color-ink-2);
+  --dim: var(--color-ink-3);
+  --accent: var(--color-accent);
+  --accent-soft: var(--color-accent-soft);
+  --good: var(--color-success);
+  --bad: var(--color-error);
+  --mono: var(--font-mono);
+}

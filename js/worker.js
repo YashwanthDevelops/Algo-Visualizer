@@ -1,2 +1,14 @@
-import {execute,compare} from './engine.js';
-self.onmessage=({data})=>{try{const result=data.type==='compare'?compare(data.lab,data.config):execute(data.lab,data.config);self.postMessage({id:data.id,result});}catch(error){self.postMessage({id:data.id,error:error.message});}};
+import { execute, compare, compareVisual } from "./engine.js";
+self.onmessage = ({ data }) => {
+  try {
+    const result =
+      data.type === "visual-compare"
+        ? compareVisual(data.lab, data.config, data.algorithms)
+        : data.type === "compare"
+          ? compare(data.lab, data.config)
+          : execute(data.lab, data.config);
+    self.postMessage({ id: data.id, result });
+  } catch (error) {
+    self.postMessage({ id: data.id, error: error.message });
+  }
+};

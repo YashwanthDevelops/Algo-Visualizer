@@ -1,0 +1,4 @@
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-3.6-flash
+GEMINI_TIMEOUT_MS=60000
+ALLOWED_ORIGINS=https://your-static-site.example

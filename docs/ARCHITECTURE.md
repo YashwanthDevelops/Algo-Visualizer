@@ -4,6 +4,7 @@
 flowchart LR
   Settings[Problem settings and presets] --> Config[Immutable configuration copy]
   Config --> Worker[Module Web Worker]
+  Config --> Validation[Shared configuration validation]
   Worker --> Models[Grid / Queens / Game / CSP models]
   Models --> Engines[Independent algorithm modules]
   Engines --> Trace[Recorded snapshots and explanations]
@@ -23,6 +24,7 @@ The worker receives a copied problem; each algorithm computes without touching t
 | --- | --- |
 | `index.html`, `styles.css` | Semantic app shell, navigation, dark responsive design, focus styles, labeled state symbols |
 | `js/models.js` | Problem presets, configurations, and algorithm choices |
+| `js/validation.js` | Normalized configuration checks used by engine and persistence |
 | `js/core.js` | Queue, stack, stable binary-heap priority queue, Xorshift32 PRNG, immutable recorder, engine timing |
 | `js/algorithms/pathfinding.js` | Five explicit graph-search policies, relaxation, parent/path reconstruction |
 | `js/algorithms/optimization.js` | Pair-conflict objective, steepest hill climbing, simulated annealing |
@@ -32,10 +34,11 @@ The worker receives a copied problem; each algorithm computes without touching t
 | `js/worker.js` | Worker message boundary and error handling |
 | `js/playback.js` | Timer, run/pause/next/previous/reset/seek/speed; algorithms never run from a playback timer |
 | `js/renderers.js` | Labeled SVG grids, boards and charts; Sudoku/timetable views; pseudocode and cost inspector |
-| `js/storage.js` | Versioned LocalStorage and experiment summaries |
+| `js/storage.js` | Validated versioned LocalStorage, recovery warnings, imports, share codes, and experiment summaries |
 | `js/main.js` | User events, routing, worker cancellation, dashboard composition and persistence orchestration |
 | `tests/algorithms.test.js` | Independent invariants, fixtures, optimality and bounded-memory regression checks |
 | `scripts/comparison-report.mjs` | Reproducible real report generation using the same engine |
+| `scripts/browser-smoke.mjs` | Small Playwright Chromium check for pathfinding playback, navigation, and reload |
 
 ## Lifecycle
 
@@ -44,5 +47,9 @@ Ready → Computing → Recorded/paused → Playing → Paused/completed. Reset 
 Snapshots are independent structured clones. Trace caps bound memory; the final snapshot is retained even when intermediate recording stops. Game node values have event-indexed update histories, so expanding a node while rewinding does not reveal a later backed-up value. Sparse tree retention bounds opening Minimax memory while the full search still computes exact root results.
 
 Workers can run scripts separately from the UI thread and communicate through copied messages. Rendering and LocalStorage remain on the main thread. [MDN Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+
+Configuration import validates each provided lab configuration before merging. Corrupt saved configurations and individual history rows are skipped with recovery warnings. Share codes encode one validated lab configuration as URL-safe Base64; decoding is bounded to 100 KB. GitHub Pages runs the Node regression suite before preparing a deployment artifact.
+
+The Pages workflow also installs the development-only Playwright package and Chromium, then serves the static project from an in-process Node HTTP server for a pathfinding Run → Next → Previous → navigation → reload smoke check. No browser package is required by the app at runtime.
 
 SVG integrates labeled geometry with the DOM, making cells, boards, and charts inspectable and responsive. HTML is used where native controls and disclosures are more accessible, including game tree expansion and puzzle entry. [MDN SVG](https://developer.mozilla.org/en-US/docs/Web/SVG)

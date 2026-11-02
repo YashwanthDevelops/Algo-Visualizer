@@ -3,3 +3,10 @@
 Thumbs.db
 node_modules/
 npm-debug.log*
+.env
+.dev.vars
+.agents/
+.hallmark/
+.impeccable/
+/reports/question-live-extraction.json
+/reports/question-live-user-test/

@@ -1,6 +1,33 @@
 # Actual verification results
 
-Verified 13 October 2026 in the project workspace. No mocked decisions, fabricated performance figures, external dependencies, or paid API calls were used.
+## Question Visualizer integration on 2 November 2026
+
+| Check | Result |
+| --- | --- |
+| `npm test` | **38/38 passed**, 0 failed |
+| `npm run smoke:question` | Passed with a mocked API response: upload contract, draft review, missing-cost preservation, algorithm conflict and uncertainty review, graph worker playback, Next/Previous, solution invalidation after editing, and missing-key fallback |
+| Responsive and motion checks | Passed at 390×844 with no horizontal overflow; reduced-motion mode exercised |
+| Screenshot artifacts | [Desktop](../reports/question-visualizer-final/question-desktop.png), [reduced motion](../reports/question-visualizer-final/question-reduced-motion.png), [mobile](../reports/question-visualizer-final/question-mobile.png) |
+| Live Gemini API / deployment | Two local live checks returned HTTP 200; Gemini Worker/API deployment was not performed |
+
+The mocked browser check verifies the user flow and API contract only. In a separate live browser check, Gemini returned a 9-node, 8-edge graph, the interface flagged algorithm ambiguity, and local BFS playback showed route S → B → H → G → E with four moves and unknown path cost. A separate normalized sample remains in the local workspace and is excluded from the repository because it contains user-provided question content. These samples are not an extraction accuracy evaluation.
+
+## Verification on 2 November 2026
+
+The integrated project was verified after the engine and UI updates.
+
+| Check | Result |
+| --- | --- |
+| `npm test` | **23/23 passed**, 0 failed |
+| `npm run smoke:browser` | Passed pathfinding Run, Next, Previous, lab navigation, page reload, and persisted run-summary check |
+| Responsive smoke | Passed at 390×844 with no horizontal overflow |
+| Screenshot artifacts | [Normal desktop](../reports/ui-smoke/workbench-normal.png), [reduced motion](../reports/ui-smoke/workbench-reduced-motion.png), [mobile](../reports/ui-smoke/workbench-mobile.png) |
+
+The smoke check uses one Chromium browser and is not a cross-browser or exhaustive accessibility test.
+
+## Historical verification on 13 October 2026
+
+The following Node counts, measurements, and browser observations are from the earlier project baseline and are retained as historical results. The newer 23-test result above includes the added algorithm-option regressions.
 
 ## Automated correctness checks
 
@@ -62,4 +89,4 @@ The only browser automation selector mismatch was resolved by targeting the visi
 
 ## Known limits
 
-Trace retention is capped (1,800 ordinary events / 12,000 game events plus the final frame), and very large game trees retain only the first 30,000 visited nodes and top two levels. Explicit warnings identify omissions; full computation and metrics continue. The fixed teaching grid, one-slot timetable model, fixed CSP ordering, first-solution Sudoku behavior, local-origin persistence, and finite stochastic budgets are documented in the README. Browser integration was verified in one browser; a cross-browser matrix and exhaustive accessibility audit were not performed.
+Trace retention is capped (1,800 ordinary events / 12,000 game events plus the final frame), and very large game trees retain only the first 30,000 visited nodes and top two levels. Explicit warnings identify omissions; full computation and metrics continue. Grid presets can scale from 5–40 rows and columns; custom smaller grids remain supported by the engine. CSP MRV/degree and LCV ordering are optional. The one-slot timetable model, first-solution Sudoku behavior, local-origin persistence, and finite stochastic budgets remain documented limitations. The 2 November smoke run verified one Chromium browser and a 390×844 viewport; a cross-browser matrix and exhaustive accessibility audit were not performed.
