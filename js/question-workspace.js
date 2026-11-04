@@ -1,3 +1,5 @@
+import {mountStudySelects} from './study-select.js';
+import {icon} from './icons.js';
 import { escapeHTML as e } from "./core.js";
 import { Playback } from "./playback.js";
 import {
@@ -140,7 +142,11 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   let originalUrl = null;
   let cropUrl = null;
   let imageDimensions = null;
+  let imageSelectionId = 0;
   let analysisController = null;
+  let analysisPending = false;
+  let cleanupAnalysisOrb = null;
+  const orbReady = import("../assets/glyph/analysis-orb.js").catch(() => null);
   let analysisRequestId = 0;
   let solverWorker = null;
   let solutionRequestId = 0;
@@ -152,6 +158,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   let destroyed = false;
   let validation = validateGraphDraft(draft, selectedAlgorithm);
   let playback;
+  let dropdowns=null,rendering=false,studyMode="explanation";
 
   const setStatus = (message, kind = "info") => {
     statusMessage = message;
@@ -172,6 +179,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const cancelAnalysis = () => {
+    analysisPending = false;
     analysisRequestId += 1;
     analysisController?.abort();
     analysisController = null;
@@ -208,6 +216,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const setTab = (tab) => {
+    playback?.pause();
     activeTab = tab;
     render();
     container.querySelector(`[data-qv-tab="${tab}"]`)?.focus();
@@ -226,6 +235,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   const chooseAlgorithm = (algorithm) => {
     if (!QUESTION_ALGORITHMS.some((item) => item.id === algorithm)) return;
     if (selectedAlgorithm !== algorithm) {
+      cancelAnalysis();
       selectedAlgorithm = algorithm;
       algorithmConflictDecision = null;
       invalidateSolution();
@@ -237,16 +247,17 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
       activeTab = "upload";
     }
     statusMessage = "";
+    statusKind = "info";
     render();
   };
 
   const selectImage = async (file) => {
-    analysisRequestId += 1;
-    analysisController?.abort();
-    analysisController = null;
+    if (!file) return;
+    const selectionId = ++imageSelectionId;
+    cancelAnalysis();
     try {
       const dimensions = await validateImage(file);
-      if (destroyed) return;
+      if (destroyed || selectionId !== imageSelectionId) return;
       closePreviews();
       imageFile = file;
       imageDimensions = dimensions;
@@ -260,6 +271,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
       activeTab = "upload";
       render();
     } catch (error) {
+      if (destroyed || selectionId !== imageSelectionId) return;
       statusMessage = error.message;
       statusKind = "error";
       render();
@@ -331,9 +343,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   const changeAlgorithm = (algorithm) => {
     if (selectedAlgorithm === algorithm) return;
     selectedAlgorithm = algorithm;
-    analysisRequestId += 1;
-    analysisController?.abort();
-    analysisController = null;
+    cancelAnalysis();
     invalidateSolution();
     checked();
     setStatus(
@@ -344,22 +354,29 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const analyzeImage = async () => {
-    if (!imageFile || !selectedAlgorithm) return;
+    if (!imageFile || statusKind === "busy") return;
+    if (!selectedAlgorithm) {
+      setStatus("Choose an algorithm above before analyzing this image.", "error");
+      container.querySelector("#qv-algorithm-trigger")?.focus();
+      return;
+    }
     const requestId = ++analysisRequestId;
     analysisController?.abort();
     analysisController = new AbortController();
+    const controller = analysisController;
+    analysisPending = true;
     invalidateSolution();
-    activeTab = "review";
     statusMessage = "Analyzing the image…";
     statusKind = "busy";
     render();
     try {
       const source = croppedFile || imageFile;
       const base64 = await fileAsBase64(source);
+      if (destroyed || requestId !== analysisRequestId) return;
       const response = await fetch(QUESTION_API_URL, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        signal: analysisController.signal,
+        signal: controller.signal,
         body: JSON.stringify({
           schemaVersion: 1,
           selectedAlgorithm,
@@ -368,6 +385,8 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
       });
       const body = await response.json().catch(() => ({}));
       if (destroyed || requestId !== analysisRequestId) return;
+      analysisPending = false;
+      analysisController = null;
       if (!response.ok) {
         const code = body?.error?.code;
         if (response.status === 503 || code === "configuration_missing") {
@@ -407,6 +426,8 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
         requestId !== analysisRequestId
       )
         return;
+      analysisPending = false;
+      analysisController = null;
       statusMessage =
         error.message ||
         "Image analysis failed. You can retry or continue with manual graph entry.";
@@ -416,9 +437,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const manualEntry = () => {
-    analysisRequestId += 1;
-    analysisController?.abort();
-    analysisController = null;
+    cancelAnalysis();
     invalidateSolution();
     if (!draft.nodes.length && !draft.questionText)
       draft = normalizeGraphDraft({ directed: false });
@@ -563,18 +582,22 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const editorHTML = () =>
-    `<div class="qv-review-grid"><section class="qv-graph-preview"><div class="qv-section-heading"><h3>Graph preview</h3><p>Click a node after choosing whether to set Start or Goal.</p></div><div class="qv-graph-frame">${graphPreview(true)}</div><div class="qv-endpoint-tools"><button type="button" data-qv-action="endpoint-start" aria-pressed="${endpointMode === "start"}">Set clicked node as Start</button><button type="button" data-qv-action="endpoint-goal" aria-pressed="${endpointMode === "goal"}">Set clicked node as Goal</button></div></section><section class="qv-graph-editor"><div class="qv-section-heading"><h3>Edit graph data</h3><p>Names, heuristics, edge connections, and costs remain editable.</p></div><label class="qv-field">Question text<textarea data-qv-field="questionText" rows="3" maxlength="5000">${e(draft.questionText)}</textarea></label><div class="qv-editor-controls"><label class="qv-field">Edges are<select data-qv-field="directed"><option value="" ${draft.directed === null ? "selected" : ""}>Not specified</option><option value="false" ${draft.directed === false ? "selected" : ""}>Undirected</option><option value="true" ${draft.directed === true ? "selected" : ""}>Directed</option></select></label><label class="qv-field">Start node<select data-qv-field="startId">${nodeOptions(draft.startId)}</select></label><label class="qv-field">Goal node<select data-qv-field="goalId">${nodeOptions(draft.goalId)}</select></label></div><div class="qv-section-heading"><h4>Nodes</h4><button type="button" data-qv-action="add-node">Add node</button></div><div class="qv-node-list">${draft.nodes.map((node, index) => `<fieldset class="qv-node-row"><legend>${e(node.label || node.id || `Node ${index + 1}`)}</legend><label class="qv-field">ID<input data-node-index="${index}" data-node-key="id" value="${e(node.id)}" maxlength="80"></label><label class="qv-field">Label<input data-node-index="${index}" data-node-key="label" value="${e(node.label)}" maxlength="120"></label><label class="qv-field">Heuristic h<input data-node-index="${index}" data-node-key="heuristic" type="number" min="0" max="1000000" step="any" value="${node.heuristic ?? ""}" placeholder="Unknown"></label><button type="button" class="qv-remove" data-qv-action="remove-node" data-index="${index}">Remove node</button></fieldset>`).join("") || `<p class="qv-empty-note">No nodes yet.</p>`}</div><div class="qv-section-heading"><h4>Edges</h4><button type="button" data-qv-action="add-edge" ${draft.nodes.length < 2 ? "disabled" : ""}>Add edge</button></div><div class="qv-edge-list">${draft.edges.map((edge, index) => `<fieldset class="qv-edge-row"><legend>Edge ${index + 1}</legend><label class="qv-field">From<select data-edge-index="${index}" data-edge-key="source">${nodeOptions(edge.source)}</select></label><label class="qv-field">To<select data-edge-index="${index}" data-edge-key="target">${nodeOptions(edge.target)}</select></label><label class="qv-field">Cost<input data-edge-index="${index}" data-edge-key="cost" type="number" min="0" max="1000000" step="any" value="${edge.cost ?? ""}" placeholder="Unknown"></label><button type="button" class="qv-remove" data-qv-action="remove-edge" data-index="${index}">Remove edge</button></fieldset>`).join("") || `<p class="qv-empty-note">No edges yet.</p>`}</div></section></div>`;
+    `<div class="qv-review-grid"><section class="qv-graph-preview"><div class="qv-section-heading"><h3>Graph preview</h3><p>Click a node after choosing whether to set Start or Goal.</p></div><div class="qv-graph-frame">${graphPreview(true)}</div><div class="qv-endpoint-tools"><button type="button" data-qv-action="endpoint-start" aria-pressed="${endpointMode === "start"}">Set clicked node as Start</button><button type="button" data-qv-action="endpoint-goal" aria-pressed="${endpointMode === "goal"}">Set clicked node as Goal</button></div></section><section class="qv-graph-editor"><div class="qv-section-heading"><h3>Edit graph data</h3><p>Names, heuristics, edge connections, and costs remain editable.</p></div>${uncertaintyHTML()}<label class="qv-field">Question text<textarea data-qv-field="questionText" rows="3" maxlength="5000">${e(draft.questionText)}</textarea></label><div class="qv-editor-controls"><label class="qv-field">Edges are<select data-qv-field="directed"><option value="" ${draft.directed === null ? "selected" : ""}>Not specified</option><option value="false" ${draft.directed === false ? "selected" : ""}>Undirected</option><option value="true" ${draft.directed === true ? "selected" : ""}>Directed</option></select></label><label class="qv-field">Start node<select data-qv-field="startId">${nodeOptions(draft.startId)}</select></label><label class="qv-field">Goal node<select data-qv-field="goalId">${nodeOptions(draft.goalId)}</select></label></div><details class="qv-editor-section" data-qv-section="nodes" open><summary>Nodes · ${draft.nodes.length}</summary><div class="qv-section-heading"><h4>Nodes</h4><button type="button" data-qv-action="add-node">Add node</button></div><div class="qv-node-list">${draft.nodes.map((node, index) => `<fieldset class="qv-node-row"><legend>${e(node.label || node.id || `Node ${index + 1}`)}</legend><label class="qv-field">ID<input data-node-index="${index}" data-node-key="id" value="${e(node.id)}" maxlength="80"></label><label class="qv-field">Label<input data-node-index="${index}" data-node-key="label" value="${e(node.label)}" maxlength="120"></label><label class="qv-field">Heuristic h<input data-node-index="${index}" data-node-key="heuristic" type="number" min="0" max="1000000" step="any" value="${node.heuristic ?? ""}" placeholder="Unknown"></label><button type="button" class="qv-remove" data-qv-action="remove-node" data-index="${index}">Remove node</button></fieldset>`).join("") || `<p class="qv-empty-note">No nodes yet.</p>`}</div></details><details class="qv-editor-section" data-qv-section="edges"><summary>Edges · ${draft.edges.length}</summary><div class="qv-section-heading"><h4>Edges</h4><button type="button" data-qv-action="add-edge" ${draft.nodes.length < 2 ? "disabled" : ""}>Add edge</button></div><div class="qv-edge-list">${draft.edges.map((edge, index) => `<fieldset class="qv-edge-row"><legend>Edge ${index + 1}</legend><label class="qv-field">From<select data-edge-index="${index}" data-edge-key="source">${nodeOptions(edge.source)}</select></label><label class="qv-field">To<select data-edge-index="${index}" data-edge-key="target">${nodeOptions(edge.target)}</select></label><label class="qv-field">Cost<input data-edge-index="${index}" data-edge-key="cost" type="number" min="0" max="1000000" step="any" value="${edge.cost ?? ""}" placeholder="Unknown"></label><button type="button" class="qv-remove" data-qv-action="remove-edge" data-index="${index}">Remove edge</button></fieldset>`).join("") || `<p class="qv-empty-note">No edges yet.</p>`}</div></details></section></div>`;
 
   const imagePanelHTML = (review = false) => {
     if (!imageFile)
-      return `<div class="qv-empty-upload"><p>No image selected. Add a JPG, PNG, or WEBP question image, or enter the graph manually.</p><button type="button" data-qv-action="manual-entry">Enter a graph manually</button><button type="button" data-qv-action="sample">Load labeled sample graph</button></div>`;
-    return `<div class="qv-image-previews ${review ? "is-review" : ""}"><figure><img src="${e(originalUrl)}" alt="Original uploaded question image"><figcaption>Original image · ${imageDimensions.width} × ${imageDimensions.height}</figcaption></figure>${croppedFile ? `<figure><img src="${e(cropUrl)}" alt="Cropped image that will be sent for analysis"><figcaption>Crop used for analysis · ${croppedFile.type}</figcaption></figure>` : ""}</div>`;
+      return `<div class="qv-empty-upload"><p>No image selected. Add a JPG, PNG, or WEBP question image, or enter the graph manually.</p><button type="button" data-qv-action="manual-entry">Enter a graph manually</button><button type="button" data-qv-action="sample">Load sample graph</button></div>`;
+    const previewUrl = croppedFile ? cropUrl : originalUrl;
+    const caption = croppedFile
+      ? "Cropped image · used for analysis"
+      : `Ready for analysis · ${imageDimensions.width} × ${imageDimensions.height}`;
+    return `<div class="qv-image-previews ${review ? "is-review" : ""}"><figure><img src="${e(previewUrl)}" alt="${croppedFile ? "Cropped question image" : "Uploaded question image"}"><figcaption>${caption}</figcaption></figure></div>`;
   };
 
   const uploadHTML = () =>
-    `<section class="qv-upload-panel"><div class="qv-section-heading"><h2>Upload a question image</h2><p>Supported formats: JPG, PNG, WEBP · Maximum size 8 MB.</p></div><div class="qv-dropzone" data-qv-dropzone><input id="${workspaceId}-file" class="qv-file-input" type="file" accept="image/jpeg,image/png,image/webp"><label for="${workspaceId}-file"><span class="qv-drop-icon" aria-hidden="true">↑</span><b>Choose an image</b><span>or drop it here</span><small>Only JPG, PNG, and WEBP are accepted.</small></label></div>${imagePanelHTML()}${
+    `<div class="qv-intake-layout"><section class="qv-upload-panel"><div class="qv-section-heading"><h2>Upload one question image</h2><p>Choose one JPG, PNG, or WEBP image · Up to 8 MB.</p></div>${imageFile?`<div class="qv-selected-image">${imagePanelHTML()}<div class="qv-image-actions"><label class="qv-button" for="${workspaceId}-replace">Replace image<input id="${workspaceId}-replace" class="qv-file-input" type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" class="qv-danger" data-qv-action="remove-image">Remove</button></div></div>`:`<div class="qv-dropzone" data-qv-dropzone><input id="${workspaceId}-file" class="qv-file-input" type="file" accept="image/jpeg,image/png,image/webp"><label for="${workspaceId}-file"><span class="qv-drop-icon" aria-hidden="true">↑</span><b>Choose one image</b><span>or drop one image here</span><small>JPG, PNG, or WEBP · Up to 8 MB</small></label></div>`}${
       imageFile
-        ? `<section class="qv-crop-panel"><div class="qv-section-heading"><h3>Crop the image</h3><p>Crop is made in your browser. The original stays available for review.</p></div><div class="qv-crop-fields">${[
+        ? `<details class="qv-crop-panel" data-qv-section="crop"><summary>Crop image (optional)</summary><div class="qv-section-heading"><h3>Crop the image</h3><p>Adjust the part of this image sent for analysis.</p></div><div class="qv-crop-fields">${[
             ["x", "Left"],
             ["y", "Top"],
             ["width", "Width"],
@@ -586,12 +609,11 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
             )
             .join(
               "",
-            )}</div><button type="button" data-qv-action="apply-crop">Apply crop</button><div class="qv-image-actions"><label class="qv-button" for="${workspaceId}-replace">Replace image<input id="${workspaceId}-replace" class="qv-file-input" type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" class="qv-danger" data-qv-action="remove-image">Remove image</button></div></section>`
+            )}</div><button type="button" data-qv-action="apply-crop">Apply crop</button></details>`
         : ""
-    }<div class="qv-upload-actions"><button type="button" class="primary" data-qv-action="analyze" ${!imageFile || !selectedAlgorithm ? "disabled" : ""}>${statusKind === "busy" ? "Analyzing…" : "Analyze question"}</button><button type="button" data-qv-action="cancel-analysis" ${statusKind !== "busy" ? "disabled" : ""}>Cancel analysis</button><button type="button" data-qv-action="manual-entry">Continue with manual graph</button><button type="button" data-qv-action="sample">Load labeled sample graph</button></div></section>`;
+    }<div class="qv-upload-actions"><div class="qv-analysis-controls"><button type="button" class="primary" data-qv-action="analyze" aria-busy="${analysisPending}" ${analysisPending ? 'aria-label="Analyzing image"' : ""} ${!imageFile || statusKind === "busy" ? "disabled" : ""}>${analysisPending ? '<span data-qv-analysis-orb aria-hidden="true">Thinking…</span>' : "Analyze image"}</button><button type="button" data-qv-action="cancel-analysis" ${analysisPending ? "" : "hidden"}>Cancel</button></div><span class="qv-analyze-hint">${imageFile && !selectedAlgorithm ? "Choose an algorithm above to analyze." : "Your image is sent only when you choose Analyze image."}</span><div class="qv-secondary-actions"><button type="button" data-qv-action="manual-entry">Enter graph manually</button><button type="button" data-qv-action="sample">Load sample graph</button></div></div></section><aside class="qv-intake-guide"><h2>From question to graph</h2><ol><li><b>Choose a search method</b><p>Use the algorithm specified in your question.</p></li><li><b>Upload or enter the graph</b><p>Start with one image, a manual graph, or the sample.</p></li><li><b>Review the details</b><p>Confirm connections, costs, and start and goal nodes.</p></li><li><b>Follow the search</b><p>Step through decisions and inspect the route.</p></li></ol><p class="qv-intake-note">Image analysis sends your selected image to the analysis service when you choose Analyze image. Manual entry works without image analysis.</p></aside></div>`;
 
-  const reviewHTML = () =>
-    `${imageFile ? `<section class="qv-review-images"><div class="qv-section-heading"><h2>Question image</h2><p>The original and analyzed crop are kept separate.</p></div>${imagePanelHTML(true)}</section>` : ""}${uncertaintyHTML()}${editorHTML()}${readinessHTML()}<div class="qv-review-actions"><button type="button" data-qv-action="solve" class="primary" ${validation.valid ? "" : "disabled"}>Visualize solution with ${e(algorithmLabel(selectedAlgorithm))}</button></div>`;
+  const reviewHTML = () => `${editorHTML()}${readinessHTML()}${imageFile?`<details class="qv-review-images" data-qv-section="image"><summary>Question image</summary>${imagePanelHTML(true)}</details>`:''}<div class="qv-review-actions"><button type="button" data-qv-action="solve" class="primary" ${validation.valid?'':'disabled'}>Visualize solution</button></div>`;
 
   const currentFrame = () => playback?.steps[playback.index] || null;
   const frontierHTML = (frame) => {
@@ -624,24 +646,20 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const visualizationHTML = () => {
-    const frame = currentFrame();
-    const final = solution && playback.index === playback.steps.length - 1;
-    const noPath = final && solution.status === "no-solution";
-    const metrics = frame?.metrics || {};
-    return `<section class="qv-visual-layout"><div class="qv-visual-main"><div class="qv-section-heading"><h2>Search playback</h2><p>${e(algorithmLabel(selectedAlgorithm))} · ${e(solution?.status || "Waiting for a valid graph")}</p></div><div class="qv-visual-canvas">${graphSVG(draft, frame?.state || null, { markerId: `${workspaceId}-solution`, width: 960, height: 540 })}</div><div class="qv-playback-controls"><button type="button" data-qv-action="play" ${!solution || playback.timer ? "disabled" : ""}>Play</button><button type="button" data-qv-action="pause" ${!playback?.timer ? "disabled" : ""}>Pause</button><button type="button" data-qv-action="jump-previous" ${!solution || playback.index <= 0 ? "disabled" : ""}>Previous event</button><button type="button" data-qv-action="previous" ${!solution || playback.index <= 0 ? "disabled" : ""}>Previous</button><button type="button" data-qv-action="next" ${!solution || playback.index >= playback.steps.length - 1 ? "disabled" : ""}>Next</button><button type="button" data-qv-action="jump-next" ${!solution || playback.index >= playback.steps.length - 1 ? "disabled" : ""}>Next event</button><label class="qv-speed">Speed<input type="range" data-qv-speed min="1" max="20" value="${playback.speed}"><output>${playback.speed} steps/s</output></label><label class="qv-scrub">Recorded step<input type="range" data-qv-scrub min="0" max="${Math.max(0, (solution?.steps.length || 1) - 1)}" value="${playback.index}" ${!solution ? "disabled" : ""}><output>${solution ? `${playback.index + 1} / ${playback.steps.length}` : "No trace"}</output></label></div></div><aside class="qv-notebook"><h3>Decision notebook</h3><span class="qv-event">${e(frame?.event?.replaceAll("-", " ") || "READY TO EXPLORE")}</span><p class="qv-reason" aria-live="${playback?.timer ? "off" : "polite"}">${e(frame?.reason || "A valid graph is needed before the search can start.")}</p><h4>Pseudocode</h4><ol class="qv-pseudocode">${[
-      ...pseudocodeFor(selectedAlgorithm),
-    ]
-      .map(
-        (line, index) =>
-          `<li class="${frame?.line === index ? "is-current" : ""}">${e(line)}</li>`,
-      )
-      .join(
-        "",
-      )}</ol>${frontierHTML(frame)}<div class="qv-current-metrics"><h4>${final ? "Final result" : "Current replay metrics"}</h4><dl><dt>Expanded</dt><dd>${metrics.expanded ?? "Not available"}</dd><dt>Discovered</dt><dd>${metrics.discovered ?? "Not available"}</dd><dt>Max frontier</dt><dd>${metrics.maxFrontier ?? "Not available"}</dd><dt>Path length</dt><dd>${metrics.pathLength ?? (noPath ? "No path" : "Not available")}</dd><dt>Path cost</dt><dd>${metrics.pathCost ?? (noPath ? "No path" : final ? "Not supplied" : "Not available")}</dd></dl></div>${final ? `<section class="qv-final-result"><h4>Computed solution</h4><p>${solution.status === "solved" ? e(solution.output.path.join(" → ")) : solution.status === "no-solution" ? "No path found." : "Search limit reached before a path was proven."}</p><p>Selected order: ${e(solution.output.selectedOrder.join(" → ") || "None")}</p><p>Expanded order: ${e(solution.output.expansionOrder.join(" → ") || "None")}</p><p>Expanded nodes: ${solution.metrics.expanded}</p>${solution.output.pathCost === null ? `<p>Path cost: Not supplied. One or more edge costs are unknown.</p>` : `<p>Path cost: ${solution.output.pathCost}</p>`}${solution.output.warnings?.length ? `<ul>${solution.output.warnings.map((warning) => `<li>${e(warning)}</li>`).join("")}</ul>` : ""}</section>` : ""}</aside></section>`;
+    const frame=currentFrame(),final=solution&&playback.index===playback.steps.length-1,metrics=frame?.metrics||{};
+    const costText=!solution?'Path cost: —':solution.status==='no-solution'?'Path cost: No route exists.':solution.status!=='solved'?'Path cost: Not established.':solution.output.pathCost===null?'Path cost: Not supplied. One or more edge costs are unknown.':`Path cost: ${solution.output.pathCost}`;
+    const resultHTML=solution?`<section class="qv-final-result"><h4>Complete search result</h4><p>${solution.status==='solved'?e(solution.output.path.join(' → ')):solution.status==='no-solution'?'No path found.':'Search limit reached before a path was proven.'}</p><p>Selected order: ${e(solution.output.selectedOrder.join(' → ')||'None')}</p><p>Expanded order: ${e(solution.output.expansionOrder.join(' → ')||'None')}</p><p>Expanded nodes: ${solution.metrics.expanded}</p><p>${e(costText)}</p>${solution.output.warnings?.length?`<ul>${solution.output.warnings.map(v=>`<li>${e(v)}</li>`).join('')}</ul>`:''}</section>`:'<p>Generate a trace to inspect its result.</p>';
+    const values=`<div class="qv-current-metrics"><h4>Selected replay step</h4><dl>${[['expanded','Expanded'],['discovered','Discovered'],['maxFrontier','Max frontier'],['pathLength','Path length'],['pathCost','Path cost']].map(([key,label])=>`<dt>${label}</dt><dd>${metrics[key]??'—'}</dd>`).join('')}</dl></div>`;
+    const settings=`<h4>Playback speed</h4><label class="qv-speed">Steps per second<input type="range" data-qv-speed min="1" max="20" value="${playback.speed}"><output>${playback.speed} steps/s</output></label><div class="qv-key-controls"><button data-qv-action="jump-previous" ${!solution||playback.index<=0?'disabled':''}>Previous key event</button><button data-qv-action="jump-next" ${!solution||playback.index>=playback.steps.length-1?'disabled':''}>Next key event</button></div><p>Space to play or pause. Left and right arrows step through the recorded search.</p>`;
+    const explanation=`<p class="qv-step-label">${solution?`Step ${playback.index+1} of ${playback.steps.length}`:'Preparing your graph'}</p><span class="qv-event">${e(frame?.event?.replaceAll('-',' ')||'Ready to explore')}</span><p class="qv-reason" aria-live="${playback.timer?'off':'polite'}">${e(frame?.reason||'The graph stays in place while its trace is computed.')}</p><h4>Algorithm steps</h4><ol class="qv-pseudocode">${pseudocodeFor(selectedAlgorithm).map((line,i)=>`<li class="${frame?.line===i?'is-current':''}" ${frame?.line===i?'aria-current="step"':''}><span>${i+1}</span><code>${e(line)}</code></li>`).join('')}</ol>${final?`<div class="qv-outcome"><strong>${solution.status==='solved'?'Route found':solution.status==='no-solution'?'No path found':'Search limit reached'}</strong><p>${solution.status==='solved'?e(solution.output.path.join(' → ')):e(frame?.reason||'')}</p><p>${e(costText)}</p></div>`:''}`;
+    return `<section class="qv-visual-layout"><div class="qv-visual-main"><div class="qv-canvas-frame"><div class="qv-canvas-heading"><span>${e(algorithmLabel(selectedAlgorithm))}</span><span>${draft.nodes.length} nodes · ${draft.edges.length} edges</span></div><div class="qv-visual-canvas">${graphSVG(draft,frame?.state||null,{markerId:`${workspaceId}-solution`,width:960,height:540})}</div><div class="qv-graph-legend"><span>Filled · explored</span><span>Outlined · frontier</span><span>Light · selected route</span></div>${statusKind==='busy'&&!solution?'<div class="qv-loading" role="status">Preparing the search…</div>':''}</div><div class="qv-playback-controls"><button data-qv-action="play" aria-label="Play search" ${!solution||playback.timer?'disabled':''}>${icon('play')}</button><button data-qv-action="pause" aria-label="Pause search" ${!playback.timer?'disabled':''}>${icon('pause')}</button><button data-qv-action="previous" aria-label="Previous step" ${!solution||playback.index<=0?'disabled':''}>${icon('skip-back')}</button><button data-qv-action="next" aria-label="Next step" ${!solution||playback.index>=playback.steps.length-1?'disabled':''}>${icon('skip-forward')}</button><label class="qv-scrub"><span class="sr-only">Recorded step</span><input type="range" data-qv-scrub min="0" max="${Math.max(0,(solution?.steps.length||1)-1)}" value="${playback.index}" ${!solution?'disabled':''}><output>${solution?`${playback.index+1} / ${playback.steps.length}`:'0 / 0'}</output></label></div><div class="qv-summary">${[['expanded','Expanded'],['discovered','Discovered'],['pathLength','Path length'],['pathCost','Path cost']].map(([key,label])=>`<div><span>${label}</span><strong>${metrics[key]??'—'}</strong></div>`).join('')}</div></div><aside class="qv-notebook" data-execution-step="${frame?.eventIndex??'ready'}">${studyMode==='explanation'?'<h3>Decision notebook</h3>':`<button class="qv-back" data-qv-action="study-explanation">${icon('arrow-left')}Back to explanation</button><h3>${({frontier:'Frontier',result:'Run details',settings:'Playback settings'})[studyMode]}</h3>`}${studyMode==='explanation'?explanation:studyMode==='frontier'?frontierHTML(frame):studyMode==='result'?values+resultHTML:settings}</aside></section><div class="qv-study-tools">${[['explanation','Explanation'],['frontier','Frontier'],['result','Run details'],['settings','Playback settings']].map(([mode,label])=>`<button data-qv-action="study-${mode}" aria-pressed="${studyMode===mode}">${label}</button>`).join('')}<button data-qv-action="edit-graph">Edit graph</button></div>`;
   };
 
   const render = () => {
-    if (destroyed) return;
+    if (destroyed||rendering) return;
+    rendering=true;
+    try{
+    const openSections=new Set([...container.querySelectorAll('details[data-qv-section][open]')].map(el=>el.dataset.qvSection));
     validation = checked();
     const active = document.activeElement;
     const restoreId =
@@ -660,7 +678,19 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
         : activeTab === "review"
           ? reviewHTML()
           : `<div class="qv-visual-content">${visualizationHTML()}</div>`;
-    container.innerHTML = `<section class="qv-workspace" data-qv-id="${workspaceId}"><header class="qv-heading"><div><h1>Visualize a question</h1><p>Upload a graph question or enter its graph directly, then inspect how a search algorithm finds a route.</p></div>${selectedAlgorithm ? `<div class="qv-selected-algorithm"><span>Selected algorithm</span><b>${e(algorithmLabel(selectedAlgorithm))}</b><button type="button" data-qv-action="change-algorithm">Change algorithm</button></div>` : ""}</header>${!selectedAlgorithm ? `<section class="qv-algorithm-picker"><h2>Choose an algorithm</h2><p>Choose the search method to use. If an image suggests another method, we’ll point that out and keep your choice.</p><div class="qv-algorithm-cards">${QUESTION_ALGORITHMS.map((algorithm) => `<button type="button" class="qv-algorithm-card" data-qv-algorithm="${algorithm.id}"><span class="qv-algorithm-name">${e(algorithm.label)}</span><span>${e(algorithm.description)}</span><span class="qv-card-action">Select algorithm →</span></button>`).join("")}</div></section>` : `<nav class="qv-tabs" role="tablist" aria-label="Question workflow">${tabs.map((tab) => `<button type="button" id="${workspaceId}-tab-${tab}" role="tab" aria-selected="${activeTab === tab}" aria-controls="${workspaceId}-panel" data-qv-tab="${tab}" tabindex="${activeTab === tab ? 0 : -1}">${tab === "visualize" ? "Visualize" : tab[0].toUpperCase() + tab.slice(1)}</button>`).join("")}</nav><section id="${workspaceId}-panel" class="qv-panel" role="tabpanel" aria-labelledby="${workspaceId}-tab-${activeTab}">${content}<p data-qv-status class="qv-status qv-status-${statusKind}" role="status" aria-live="polite">${e(statusMessage)}</p></section>`}</section>`;
+    dropdowns?.destroy();
+    cleanupAnalysisOrb?.();
+    cleanupAnalysisOrb = null;
+    container.innerHTML=`<section class="qv-workspace pf-page" data-qv-id="${workspaceId}"><header class="qv-heading"><div><h1>Question Visualizer</h1><p>Turn a graph question into a search you can follow.</p></div></header><div class="qv-setup"><div class="field select-field"><label for="qv-algorithm">Algorithm</label><span class="select-control"><select id="qv-algorithm" data-qv-select-algorithm><option value="">Choose an algorithm</option>${QUESTION_ALGORITHMS.map(algorithm=>`<option value="${algorithm.id}" ${selectedAlgorithm===algorithm.id?'selected':''}>${e(algorithm.label)}</option>`).join('')}</select></span></div><nav class="qv-tabs" role="tablist" aria-label="Question workflow">${tabs.map((tab,i)=>`<button id="${workspaceId}-tab-${tab}" role="tab" aria-selected="${activeTab===tab}" aria-controls="${workspaceId}-panel" data-qv-tab="${tab}" tabindex="${activeTab===tab?0:-1}"><span>${i+1}</span>${tab==='visualize'?'Visualize':tab==='review'?'Review graph':'Upload / enter'}</button>`).join('')}</nav></div><section id="${workspaceId}-panel" class="qv-panel" role="tabpanel" aria-labelledby="${workspaceId}-tab-${activeTab}">${content}<p data-qv-status class="qv-status qv-status-${statusKind}" role="status" aria-live="polite">${e(statusMessage)}</p></section></section>`;
+    container.querySelectorAll('select').forEach((select,i)=>{if(!select.id)select.id=`${workspaceId}-select-${i}`;});
+    dropdowns=mountStudySelects(container.querySelector('.qv-workspace'));
+    const orbHost = container.querySelector('[data-qv-analysis-orb]');
+    if (orbHost) orbReady.then(module => {
+      if (module && !destroyed && analysisPending && orbHost.isConnected && container.contains(orbHost)) {
+        cleanupAnalysisOrb = module.mountAnalysisOrb(orbHost);
+      }
+    });
+    container.querySelectorAll('details[data-qv-section]').forEach(details=>{details.open=openSections.has(details.dataset.qvSection);});
     for (const item of uncertainties) {
       const field = String(item.field || "").toLowerCase();
       const selectors = [];
@@ -677,6 +707,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
       for (const selector of selectors) {
         for (const control of container.querySelectorAll(selector)) {
           control.classList.add("qv-uncertain-field");
+          control.closest('.pf-dropdown')?.querySelector('.pf-dropdown-trigger')?.classList.add('qv-uncertain-field');
           control.title =
             item.message ||
             "Check this extracted value against the question image.";
@@ -695,6 +726,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
         )
         ?.focus({ preventScroll: true });
     }
+    }finally{rendering=false;}
   };
 
   const updatePlaybackView = () => {
@@ -705,7 +737,12 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
     fresh.innerHTML = visualizationHTML();
     const svg = fresh.querySelector(".qv-visual-canvas");
     const canvas = host.querySelector(".qv-visual-canvas");
-    if (svg && canvas) canvas.innerHTML = svg.innerHTML;
+    if(svg&&canvas){
+      const oldNodes=[...canvas.querySelectorAll('[data-qv-node],[data-qv-edge]')],newNodes=[...svg.querySelectorAll('[data-qv-node],[data-qv-edge]')];
+      if(oldNodes.length===newNodes.length&&oldNodes.length)newNodes.forEach((node,i)=>oldNodes[i].setAttribute('class',node.getAttribute('class')));
+      else canvas.innerHTML=svg.innerHTML;
+    }
+    const summary=fresh.querySelector('.qv-summary'),oldSummary=host.querySelector('.qv-summary');if(summary&&oldSummary)oldSummary.innerHTML=summary.innerHTML;
     const notebook = fresh.querySelector(".qv-notebook");
     const oldNotebook = host.querySelector(".qv-notebook");
     if (notebook && oldNotebook) oldNotebook.replaceWith(notebook);
@@ -747,6 +784,8 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
     const reason = container.querySelector(".qv-reason");
     if (reason) reason.setAttribute("aria-live", playing ? "off" : "polite");
   });
+
+  playback.useAnimationFrame=true;
 
   const visualize = () => {
     validation = checked();
@@ -826,6 +865,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
     });
     checked();
     render();
+    container.querySelector('[data-qv-section="nodes"]').open=true;
   };
 
   const addEdge = () => {
@@ -840,6 +880,7 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
     });
     checked();
     render();
+    container.querySelector('[data-qv-section="edges"]').open=true;
   };
 
   const clickNode = (id) => {
@@ -853,6 +894,8 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const handleAction = (action, trigger) => {
+    if(action.startsWith('study-')){playback.pause();studyMode=action.slice(6);updatePlaybackView();container.querySelectorAll('.qv-study-tools button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.qvAction===action)));return;}
+    if(action==='edit-graph'){playback.pause();setTab('review');return;}
     if (action === "change-algorithm") {
       analysisRequestId += 1;
       analysisController?.abort();
@@ -865,14 +908,13 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
     else if (action === "sample") loadSample();
     else if (action === "analyze") analyzeImage();
     else if (action === "cancel-analysis") {
-      analysisRequestId += 1;
-      analysisController?.abort();
-      analysisController = null;
+      cancelAnalysis();
       statusMessage = "Analysis canceled. Your image is still available.";
       statusKind = "info";
       render();
     } else if (action === "apply-crop") applyCrop();
     else if (action === "remove-image") {
+      imageSelectionId += 1;
       cancelAnalysis();
       closePreviews();
       uncertainties = [];
@@ -960,13 +1002,17 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   };
 
   const onChange = (event) => {
+    if(rendering)return;
     const el = event.target;
+    if(el.matches("[data-qv-select-algorithm]")){if(el.value)chooseAlgorithm(el.value);return;}
     if (el.matches("[data-qv-file]")) {
-      if (el.files?.[0]) selectImage(el.files[0]);
+      if (el.files?.length > 1) setStatus("Choose one image at a time.", "error");
+      else if (el.files?.[0]) selectImage(el.files[0]);
       return;
     }
     if (el.matches(".qv-file-input")) {
-      if (el.files?.[0]) selectImage(el.files[0]);
+      if (el.files?.length > 1) setStatus("Choose one image at a time.", "error");
+      else if (el.files?.[0]) selectImage(el.files[0]);
       return;
     }
     if (
@@ -1005,8 +1051,12 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
     const zone = event.target.closest("[data-qv-dropzone]");
     if (!zone) return;
     event.preventDefault();
-    const file = event.dataTransfer?.files?.[0];
-    if (file) selectImage(file);
+    const files = event.dataTransfer?.files;
+    if (files?.length > 1) {
+      setStatus("Choose one image at a time.", "error");
+      return;
+    }
+    if (files?.[0]) selectImage(files[0]);
   };
 
   const onKeyDown = (event) => {
@@ -1043,9 +1093,16 @@ export function mountQuestionWorkspace(container, { notify = () => {} } = {}) {
   render();
 
   return {
+    showUpload() {
+      if (!destroyed) setTab("upload");
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      cleanupAnalysisOrb?.();
+      cleanupAnalysisOrb = null;
+      analysisPending = false;
+      dropdowns?.destroy();
       analysisRequestId += 1;
       solutionRequestId += 1;
       analysisController?.abort();

@@ -66,7 +66,8 @@ try {
 
   await page.goto(base);
   await page.locator('a[href="#question-visualizer"]').first().click();
-  await page.locator('[data-qv-algorithm="bfs"]').click();
+  await page.locator('#qv-algorithm-trigger').click();
+  await page.getByRole('option',{name:'Breadth-first search',exact:true}).click();
   await page.locator("input.qv-file-input").setInputFiles({ name: "question.png", mimeType: "image/png", buffer: tinyPng });
   await page.locator('[data-qv-action="analyze"]').click();
   await page.locator('[data-qv-tab="review"]').waitFor();
@@ -104,6 +105,7 @@ try {
   await page.screenshot({ path: path.join(artifactDir, "question-mobile.png"), fullPage: true });
 
   await page.locator('[data-qv-tab="review"]').click();
+  await page.locator('[data-qv-section="nodes"] > summary').click();
   await page.locator('[data-node-index="1"][data-node-key="label"]').fill("Bee");
   await page.locator('[data-qv-action="solve"]').waitFor();
   await page.locator('[data-qv-tab="visualize"]').click();
@@ -114,7 +116,8 @@ try {
   failurePage.on("request", (request) => networkRequests.push(request.url()));
   await failurePage.route("**/api/analyze-question", (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: { code: "configuration_missing", message: "Question analysis is not configured on this server." } }) }));
   await failurePage.goto(`${base}/#question-visualizer`);
-  await failurePage.locator('[data-qv-algorithm="bfs"]').click();
+  await failurePage.locator('#qv-algorithm-trigger').click();
+  await failurePage.getByRole('option',{name:'Breadth-first search',exact:true}).click();
   await failurePage.locator("input.qv-file-input").setInputFiles({ name: "question.png", mimeType: "image/png", buffer: tinyPng });
   await failurePage.locator('[data-qv-action="analyze"]').click();
   await failurePage.getByText("Image analysis is not available on this deployment. You can enter the graph manually.").waitFor();

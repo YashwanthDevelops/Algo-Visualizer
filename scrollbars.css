@@ -1,0 +1,14 @@
+/* Hide scrollbar chrome while keeping each element's native scrolling behavior. */
+:root,
+* {
+  scrollbar-width: none !important;
+  scrollbar-color: transparent transparent !important;
+}
+
+/* Chromium, Edge, and Safari. Removing the scrollbar track also releases its
+   reserved gutter on classic-scrollbar systems; overflow remains untouched. */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}

@@ -1,0 +1,11 @@
+@layer theme, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@theme { --color-background:#101010; --color-foreground:#f5f5f5; }
+@source './';
+
+/* Utilities are restricted to React islands; the existing app has its own base styles. */
+@layer utilities {
+  @scope (.sd-hero-glyph, .glyph-demo) {
+    @tailwind utilities source(none);
+  }
+}

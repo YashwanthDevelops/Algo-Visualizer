@@ -50,7 +50,7 @@ try {
   await page.waitForFunction(
     () =>
       Number(document.querySelector("#scrub")?.max) > 1 &&
-      /^Step /.test(document.querySelector("#step-count")?.textContent || ""),
+      !document.querySelector("#pause")?.hidden,
   );
   await page.locator("#pause").click();
   const before = Number(await page.locator("#scrub").inputValue());
@@ -65,14 +65,15 @@ try {
     (value) => Number(document.querySelector("#scrub")?.value) === value,
     Math.max(0, advanced - 1),
   );
-  await page.locator('#navigation a[href="#dashboard"]').click();
-  await page.locator('#navigation a[href="#pathfinding"]').click();
+  await page.locator('.sd-home').click();
+  await page.locator('.sd-menu-trigger').first().click();
+  await page.locator('.sd-menu a[href="#pathfinding"]').click();
   await page.waitForFunction(
-    () => document.querySelector("#run-status")?.textContent === "Ready",
+    () => document.querySelector("#pf-step-label")?.textContent === "Choose a map and begin",
   );
   await page.reload();
   await page.waitForFunction(
-    () => document.querySelector("#run-status")?.textContent === "Ready",
+    () => document.querySelector("#pf-step-label")?.textContent === "Choose a map and begin",
   );
   const persisted = await page.evaluate(() => {
     try {

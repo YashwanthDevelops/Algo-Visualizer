@@ -2,7 +2,7 @@ import { clone, labels } from "./core.js";
 import { pathfinding } from "./algorithms/pathfinding.js";
 import { optimization } from "./algorithms/optimization.js";
 import { game } from "./algorithms/game.js";
-import { csp } from "./algorithms/csp.js";
+import { csp } from "./algorithms/csp.js?v=calendar-4";
 import { algorithms, queensPreset } from "./models.js";
 import { validateConfiguration } from "./validation.js";
 export function execute(lab, config, trace = true) {

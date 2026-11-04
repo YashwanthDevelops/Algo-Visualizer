@@ -49,11 +49,11 @@ export function timetableModel(p) {
     !Array.isArray(p.teachers) ||
     !Array.isArray(p.sessions) ||
     !p.sessions.length ||
-    p.sessions.length > 16 ||
-    p.slots.length > 12 ||
+    p.sessions.length > 64 ||
+    p.slots.length > 84 ||
     p.rooms.length > 6
   )
-    throw Error("Use 1-16 sessions, 1-12 slots, and 1-6 rooms.");
+    throw Error("Use 1-64 sessions, 1-84 slots, and 1-6 rooms.");
   const unique = (xs) => new Set(xs.map((x) => x.id)).size === xs.length;
   if (!unique(p.rooms) || !unique(p.teachers) || !unique(p.sessions))
     throw Error("Teacher, room, and session IDs must be unique.");
@@ -68,6 +68,7 @@ export function timetableModel(p) {
     if (
       !p.teachers.some((t) => t.id === s.teacher) ||
       !s.group ||
+      (s.available !== undefined && !availability(s)) ||
       !Array.isArray(s.rooms) ||
       !s.rooms.length ||
       s.rooms.some((id) => !p.rooms.some((r) => r.id === id))
@@ -80,6 +81,7 @@ export function timetableModel(p) {
       p.rooms
         .filter(
           (r) =>
+            (s.available === undefined || s.available.includes(slot)) &&
             s.rooms.includes(r.id) &&
             r.available.includes(slot) &&
             p.teachers.find((t) => t.id === s.teacher).available.includes(slot),

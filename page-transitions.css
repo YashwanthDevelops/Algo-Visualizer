@@ -1,0 +1,45 @@
+/* Keep the shared navbar in the stable document snapshot; animate only #app. */
+#app { view-transition-name: algoai-page; }
+
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none !important;
+}
+
+::view-transition-group(algoai-page) {
+  animation: none;
+  overflow: clip;
+}
+
+::view-transition-old(algoai-page) {
+  animation: algoai-page-exit 330ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+::view-transition-new(algoai-page) {
+  animation: algoai-page-enter 330ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes algoai-page-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes algoai-page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* No View Transitions API: use the same lightweight entrance on #app. */
+#app.algoai-page-enter {
+  animation: algoai-page-enter 330ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(algoai-page),
+  ::view-transition-old(algoai-page),
+  ::view-transition-new(algoai-page),
+  #app.algoai-page-enter {
+    animation: none !important;
+  }
+}

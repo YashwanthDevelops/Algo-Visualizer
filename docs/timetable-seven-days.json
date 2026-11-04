@@ -1,0 +1,1116 @@
+{
+  "slots": [
+    "Monday 08:00–09:15",
+    "Monday 09:15–10:30",
+    "Monday 10:30–10:45 · Morning break",
+    "Monday 10:45–12:00",
+    "Monday 12:00–13:00 · Lunch break",
+    "Monday 13:00–14:15",
+    "Monday 14:15–15:30",
+    "Monday 15:30–15:45 · Afternoon break",
+    "Monday 15:45–17:00",
+    "Tuesday 08:00–09:15",
+    "Tuesday 09:15–10:30",
+    "Tuesday 10:30–10:45 · Morning break",
+    "Tuesday 10:45–12:00",
+    "Tuesday 12:00–13:00 · Lunch break",
+    "Tuesday 13:00–14:15",
+    "Tuesday 14:15–15:30",
+    "Tuesday 15:30–15:45 · Afternoon break",
+    "Tuesday 15:45–17:00",
+    "Wednesday 08:00–09:15",
+    "Wednesday 09:15–10:30",
+    "Wednesday 10:30–10:45 · Morning break",
+    "Wednesday 10:45–12:00",
+    "Wednesday 12:00–13:00 · Lunch break",
+    "Wednesday 13:00–14:15",
+    "Wednesday 14:15–15:30",
+    "Wednesday 15:30–15:45 · Afternoon break",
+    "Wednesday 15:45–17:00",
+    "Thursday 08:00–09:15",
+    "Thursday 09:15–10:30",
+    "Thursday 10:30–10:45 · Morning break",
+    "Thursday 10:45–12:00",
+    "Thursday 12:00–13:00 · Lunch break",
+    "Thursday 13:00–14:15",
+    "Thursday 14:15–15:30",
+    "Thursday 15:30–15:45 · Afternoon break",
+    "Thursday 15:45–17:00",
+    "Friday 08:00–09:15",
+    "Friday 09:15–10:30",
+    "Friday 10:30–10:45 · Morning break",
+    "Friday 10:45–12:00",
+    "Friday 12:00–13:00 · Lunch break",
+    "Friday 13:00–14:15",
+    "Friday 14:15–15:30",
+    "Friday 15:30–15:45 · Afternoon break",
+    "Friday 15:45–17:00",
+    "Saturday 08:00–09:15",
+    "Saturday 09:15–10:30",
+    "Saturday 10:30–10:45 · Morning break",
+    "Saturday 10:45–12:00",
+    "Saturday 12:00–13:00 · Lunch break",
+    "Saturday 13:00–14:15",
+    "Saturday 14:15–15:30",
+    "Saturday 15:30–15:45 · Afternoon break",
+    "Saturday 15:45–17:00",
+    "Sunday 08:00–09:15",
+    "Sunday 09:15–10:30",
+    "Sunday 10:30–10:45 · Morning break",
+    "Sunday 10:45–12:00",
+    "Sunday 12:00–13:00 · Lunch break",
+    "Sunday 13:00–14:15",
+    "Sunday 14:15–15:30",
+    "Sunday 15:30–15:45 · Afternoon break",
+    "Sunday 15:45–17:00"
+  ],
+  "rooms": [
+    {
+      "id": "Classroom 1",
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        39,
+        41,
+        42,
+        44,
+        45,
+        46,
+        48,
+        50,
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    }
+  ],
+  "teachers": [
+    {
+      "id": "Teacher_MC",
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        39,
+        41,
+        42,
+        44,
+        45,
+        46,
+        48,
+        50,
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "Teacher_FAI",
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        39,
+        41,
+        42,
+        44,
+        45,
+        46,
+        48,
+        50,
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "Teacher_TOC",
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        39,
+        41,
+        42,
+        44,
+        45,
+        46,
+        48,
+        50,
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "Teacher_CN",
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        39,
+        41,
+        42,
+        44,
+        45,
+        46,
+        48,
+        50,
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "Teacher_LCAD",
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        39,
+        41,
+        42,
+        44,
+        45,
+        46,
+        48,
+        50,
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "Teacher_WP",
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        39,
+        41,
+        42,
+        44,
+        45,
+        46,
+        48,
+        50,
+        51,
+        53,
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "id": "MC_MON",
+      "name": "Mobile Computing",
+      "teacher": "Teacher_MC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8
+      ]
+    },
+    {
+      "id": "FAI_MON",
+      "name": "Foundations of Artificial Intelligence",
+      "teacher": "Teacher_FAI",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8
+      ]
+    },
+    {
+      "id": "TOC_MON",
+      "name": "Theory of Computation",
+      "teacher": "Teacher_TOC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8
+      ]
+    },
+    {
+      "id": "CN_MON",
+      "name": "Computer Networks",
+      "teacher": "Teacher_CN",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8
+      ]
+    },
+    {
+      "id": "LCAD_MON",
+      "name": "Low Code Application Development",
+      "teacher": "Teacher_LCAD",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8
+      ]
+    },
+    {
+      "id": "WP_MON",
+      "name": "Web Programming",
+      "teacher": "Teacher_WP",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8
+      ]
+    },
+    {
+      "id": "FAI_TUE",
+      "name": "Foundations of Artificial Intelligence",
+      "teacher": "Teacher_FAI",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        9,
+        10,
+        12,
+        14,
+        15,
+        17
+      ]
+    },
+    {
+      "id": "TOC_TUE",
+      "name": "Theory of Computation",
+      "teacher": "Teacher_TOC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        9,
+        10,
+        12,
+        14,
+        15,
+        17
+      ]
+    },
+    {
+      "id": "CN_TUE",
+      "name": "Computer Networks",
+      "teacher": "Teacher_CN",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        9,
+        10,
+        12,
+        14,
+        15,
+        17
+      ]
+    },
+    {
+      "id": "LCAD_TUE",
+      "name": "Low Code Application Development",
+      "teacher": "Teacher_LCAD",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        9,
+        10,
+        12,
+        14,
+        15,
+        17
+      ]
+    },
+    {
+      "id": "WP_TUE",
+      "name": "Web Programming",
+      "teacher": "Teacher_WP",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        9,
+        10,
+        12,
+        14,
+        15,
+        17
+      ]
+    },
+    {
+      "id": "MC_TUE",
+      "name": "Mobile Computing",
+      "teacher": "Teacher_MC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        9,
+        10,
+        12,
+        14,
+        15,
+        17
+      ]
+    },
+    {
+      "id": "TOC_WED",
+      "name": "Theory of Computation",
+      "teacher": "Teacher_TOC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        18,
+        19,
+        21,
+        23,
+        24,
+        26
+      ]
+    },
+    {
+      "id": "CN_WED",
+      "name": "Computer Networks",
+      "teacher": "Teacher_CN",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        18,
+        19,
+        21,
+        23,
+        24,
+        26
+      ]
+    },
+    {
+      "id": "LCAD_WED",
+      "name": "Low Code Application Development",
+      "teacher": "Teacher_LCAD",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        18,
+        19,
+        21,
+        23,
+        24,
+        26
+      ]
+    },
+    {
+      "id": "WP_WED",
+      "name": "Web Programming",
+      "teacher": "Teacher_WP",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        18,
+        19,
+        21,
+        23,
+        24,
+        26
+      ]
+    },
+    {
+      "id": "MC_WED",
+      "name": "Mobile Computing",
+      "teacher": "Teacher_MC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        18,
+        19,
+        21,
+        23,
+        24,
+        26
+      ]
+    },
+    {
+      "id": "FAI_WED",
+      "name": "Foundations of Artificial Intelligence",
+      "teacher": "Teacher_FAI",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        18,
+        19,
+        21,
+        23,
+        24,
+        26
+      ]
+    },
+    {
+      "id": "CN_THU",
+      "name": "Computer Networks",
+      "teacher": "Teacher_CN",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        27,
+        28,
+        30,
+        32,
+        33,
+        35
+      ]
+    },
+    {
+      "id": "LCAD_THU",
+      "name": "Low Code Application Development",
+      "teacher": "Teacher_LCAD",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        27,
+        28,
+        30,
+        32,
+        33,
+        35
+      ]
+    },
+    {
+      "id": "WP_THU",
+      "name": "Web Programming",
+      "teacher": "Teacher_WP",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        27,
+        28,
+        30,
+        32,
+        33,
+        35
+      ]
+    },
+    {
+      "id": "MC_THU",
+      "name": "Mobile Computing",
+      "teacher": "Teacher_MC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        27,
+        28,
+        30,
+        32,
+        33,
+        35
+      ]
+    },
+    {
+      "id": "FAI_THU",
+      "name": "Foundations of Artificial Intelligence",
+      "teacher": "Teacher_FAI",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        27,
+        28,
+        30,
+        32,
+        33,
+        35
+      ]
+    },
+    {
+      "id": "TOC_THU",
+      "name": "Theory of Computation",
+      "teacher": "Teacher_TOC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        27,
+        28,
+        30,
+        32,
+        33,
+        35
+      ]
+    },
+    {
+      "id": "LCAD_FRI",
+      "name": "Low Code Application Development",
+      "teacher": "Teacher_LCAD",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        36,
+        37,
+        39,
+        41,
+        42,
+        44
+      ]
+    },
+    {
+      "id": "WP_FRI",
+      "name": "Web Programming",
+      "teacher": "Teacher_WP",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        36,
+        37,
+        39,
+        41,
+        42,
+        44
+      ]
+    },
+    {
+      "id": "MC_FRI",
+      "name": "Mobile Computing",
+      "teacher": "Teacher_MC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        36,
+        37,
+        39,
+        41,
+        42,
+        44
+      ]
+    },
+    {
+      "id": "FAI_FRI",
+      "name": "Foundations of Artificial Intelligence",
+      "teacher": "Teacher_FAI",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        36,
+        37,
+        39,
+        41,
+        42,
+        44
+      ]
+    },
+    {
+      "id": "TOC_FRI",
+      "name": "Theory of Computation",
+      "teacher": "Teacher_TOC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        36,
+        37,
+        39,
+        41,
+        42,
+        44
+      ]
+    },
+    {
+      "id": "CN_FRI",
+      "name": "Computer Networks",
+      "teacher": "Teacher_CN",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        36,
+        37,
+        39,
+        41,
+        42,
+        44
+      ]
+    },
+    {
+      "id": "WP_SAT",
+      "name": "Web Programming",
+      "teacher": "Teacher_WP",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        45,
+        46,
+        48,
+        50,
+        51,
+        53
+      ]
+    },
+    {
+      "id": "MC_SAT",
+      "name": "Mobile Computing",
+      "teacher": "Teacher_MC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        45,
+        46,
+        48,
+        50,
+        51,
+        53
+      ]
+    },
+    {
+      "id": "FAI_SAT",
+      "name": "Foundations of Artificial Intelligence",
+      "teacher": "Teacher_FAI",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        45,
+        46,
+        48,
+        50,
+        51,
+        53
+      ]
+    },
+    {
+      "id": "TOC_SAT",
+      "name": "Theory of Computation",
+      "teacher": "Teacher_TOC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        45,
+        46,
+        48,
+        50,
+        51,
+        53
+      ]
+    },
+    {
+      "id": "CN_SAT",
+      "name": "Computer Networks",
+      "teacher": "Teacher_CN",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        45,
+        46,
+        48,
+        50,
+        51,
+        53
+      ]
+    },
+    {
+      "id": "LCAD_SAT",
+      "name": "Low Code Application Development",
+      "teacher": "Teacher_LCAD",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        45,
+        46,
+        48,
+        50,
+        51,
+        53
+      ]
+    },
+    {
+      "id": "MC_SUN",
+      "name": "Mobile Computing",
+      "teacher": "Teacher_MC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "FAI_SUN",
+      "name": "Foundations of Artificial Intelligence",
+      "teacher": "Teacher_FAI",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "TOC_SUN",
+      "name": "Theory of Computation",
+      "teacher": "Teacher_TOC",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "CN_SUN",
+      "name": "Computer Networks",
+      "teacher": "Teacher_CN",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "LCAD_SUN",
+      "name": "Low Code Application Development",
+      "teacher": "Teacher_LCAD",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    },
+    {
+      "id": "WP_SUN",
+      "name": "Web Programming",
+      "teacher": "Teacher_WP",
+      "group": "Class A",
+      "rooms": [
+        "Classroom 1"
+      ],
+      "available": [
+        54,
+        55,
+        57,
+        59,
+        60,
+        62
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { execute, compare, compareVisual } from "./engine.js";
+import { execute, compare, compareVisual } from "./engine.js?v=calendar-4";
 self.onmessage = ({ data }) => {
   try {
     const result =

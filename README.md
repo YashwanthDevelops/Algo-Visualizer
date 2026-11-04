@@ -1,6 +1,6 @@
-# Search & Optimization Playground
+# AlgoAI
 
-A complete educational project using HTML5, CSS3, vanilla JavaScript, SVG, Web Workers, and LocalStorage. Five learning areas share recorded playback, a decision notebook, pseudocode highlighting, metrics, and reproducible comparisons. Core algorithms run in the browser without runtime dependencies, network-loaded assets, or a database. The optional Question Visualizer uses a server-side Gemini image extraction API; see its setup and verification status below.
+A complete educational project using HTML5, CSS3, vanilla JavaScript, SVG, Web Workers, and LocalStorage, with a React/TypeScript island for the dashboard glyph background. Five learning areas share recorded playback, a decision notebook, pseudocode highlighting, metrics, and reproducible comparisons. Core algorithms run in the browser without runtime dependencies, network-loaded assets, or a database. The optional Question Visualizer uses a server-side Gemini image extraction API; see its setup and verification status below.
 
 **Live app:** [YashwanthDevelops.github.io/Algo-Visualizer](https://yashwanthdevelops.github.io/Algo-Visualizer/)
 
@@ -31,7 +31,7 @@ node scripts/comparison-report.mjs
 
 The optional headless browser smoke check uses Playwright (a development-only dependency). Run `npm ci`, install Chromium with `npx playwright install chromium`, then run `npm run smoke:browser`. It checks pathfinding Run, Next, Previous, navigation, reload/persistence, and mobile overflow. Set `SMOKE_ARTIFACT_DIR` to save normal desktop, reduced-motion, and mobile screenshots. GitHub Actions runs this check and the algorithm tests before publishing.
 
-No `npm install` or build is needed. `npm start` is an alternative launch command when Python is installed. Stop the static server with Ctrl+C.
+Prebuilt assets can be served directly by Python. For development, run `npm ci` followed by `npm run dev`; the launch hook builds the dashboard React island before starting the Node server. `npm start` also builds the island before launching the Python server. After editing its TSX source, use `npm run typecheck` and `npm run build:glyph`. Stop the server with Ctrl+C. See [glyph background setup](docs/GLYPH_BACKGROUND.md) for component paths, shadcn aliases, Tailwind configuration, and lifecycle details.
 
 ## Learning areas
 

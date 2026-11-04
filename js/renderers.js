@@ -1,3 +1,4 @@
+import {calendarHTML} from './timetable-layout.js?v=calendar-4';
 import { escapeHTML as e, labels } from "./core.js";
 import { iconSprite } from "./icons.js";
 export const labNames = {
@@ -32,6 +33,7 @@ export const metricLabels = {
   worseAccepted: "Worse moves accepted",
   sidewaysMoves: "Sideways moves",
   restarts: "Restarts",
+  recoveryEvaluations: "Exact recovery checks",
   nodesEvaluated: "Nodes evaluated",
   terminalEvaluations: "Terminal scores",
   heuristicEvaluations: "Heuristic evaluations",
@@ -60,6 +62,7 @@ export const metricKeys = {
     "worseAccepted",
     "sidewaysMoves",
     "restarts",
+    "recoveryEvaluations",
     "executionMs",
   ],
   game: [
@@ -102,7 +105,7 @@ export function metricsHTML(lab, values = {}) {
     )
     .join("");
 }
-export function pathSVG(p, state = {}, selected = null, preview = false) {
+export function pathSVG(p, state = {}, selected = null, preview = false, flush = false) {
   const size = 32,
     front = new Set((state.frontier || []).map((v) => v.id)),
     path = new Set(state.path || []);
@@ -142,7 +145,8 @@ export function pathSVG(p, state = {}, selected = null, preview = false) {
       symbol = "G";
     }
     const name = `Row ${Math.floor(id / p.cols) + 1}, column ${(id % p.cols) + 1}; ${id === p.start ? "start" : id === p.goal ? "goal" : p.cells[id] === 0 ? "wall" : `movement cost ${p.cells[id]}`}`;
-    cells += `<g class="cell" data-cell="${id}" ${preview ? "" : `role="button" tabindex="${id === (selected ?? p.start) ? 0 : -1}" aria-label="${name}"`}><rect x="${x + 1}" y="${y + 1}" width="30" height="30" rx="2" fill="${fill}" stroke="${selected === id ? "var(--color-accent)" : "var(--color-cell-line)"}" stroke-width="${selected === id ? 2 : 1}"/><text x="${x + 16}" y="${y + 21}" text-anchor="middle" fill="var(--color-ink)" font-size="13" font-family="var(--font-mono)">${symbol}</text></g>`;
+    const kind = id === p.start ? 'start' : id === p.goal ? 'goal' : id === state.current ? 'current' : path.has(id) ? 'path' : front.has(id) ? 'frontier' : state.closed?.[id] ? 'expanded' : p.cells[id] === 0 ? 'wall' : p.cells[id] > 1 ? 'weight' : 'empty';
+    cells += `<g class="cell" data-cell="${id}" data-cell-state="${kind}" ${preview ? "" : `role="button" tabindex="${id === (selected ?? p.start) ? 0 : -1}" aria-label="${name}"`}><rect x="${x + (flush ? 0 : 1)}" y="${y + (flush ? 0 : 1)}" width="${flush ? 32 : 30}" height="${flush ? 32 : 30}" rx="2" fill="${fill}" stroke="${selected === id ? "var(--color-accent)" : "var(--color-cell-line)"}" stroke-width="${selected === id ? 2 : 1}"/><text x="${x + 16}" y="${y + 21}" text-anchor="middle" fill="var(--color-ink)" font-size="13" font-family="var(--font-mono)">${symbol}</text></g>`;
   }
   return `<svg class="${preview ? "" : "grid-svg"}" viewBox="0 0 ${p.cols * size} ${p.rows * size}" role="${preview ? "img" : "group"}" aria-label="Four-direction search grid. S start, G goal, cross wall, circle frontier, dot expanded, arrow path.">${cells}</svg>`;
 }
@@ -188,22 +192,7 @@ export function sudokuHTML(config, state = null) {
     })
     .join("")}</div>`;
 }
-export function timetableHTML(p, state = null) {
-  const assignments = state?.assignments || p.sessions.map(() => null);
-  let html =
-    '<div class="table-head">TIME SLOT</div>' +
-    p.rooms.map((r) => `<div class="table-head">${e(r.id)}</div>`).join("");
-  for (let slot = 0; slot < p.slots.length; slot++) {
-    html += `<div class="table-head">${e(p.slots[slot])}</div>`;
-    for (const room of p.rooms) {
-      const assigned = assignments
-        .map((v, i) => (v?.slot === slot && v.room === room.id ? i : null))
-        .filter((v) => v !== null);
-      html += `<div>${!room.available.includes(slot) ? '<span class="unavailable">× Unavailable</span>' : assigned.length ? assigned.map((i) => `<div class="session-block"><strong>${e(p.sessions[i].name)}</strong><small>${e(p.sessions[i].teacher)} · Group ${e(p.sessions[i].group)}</small></div>`).join("") : '<span class="unavailable">Free</span>'}</div>`;
-    }
-  }
-  return `<div class="grid-scroll"><div class="timetable-grid" style="grid-template-columns:105px repeat(${p.rooms.length},minmax(110px,1fr))">${html}</div></div>`;
-}
+export function timetableHTML(p,state=null){return calendarHTML(p,state);}
 export function treeHTML(tree, state, openNodes) {
   if (!tree?.length)
     return '<p class="hint">Make a move, then run the decision to inspect the search tree.</p>';
@@ -297,12 +286,9 @@ export function explanationHTML(lab, config, frame, selected = null) {
     }</div>${s?.frontier?.length > 24 ? `<small>Showing 24 of ${s.frontier.length} cells.</small>` : ""}`;
     if (selected !== null) {
       const min = Math.min(...p.cells.filter((v) => v > 0)),
-        h =
-          (Math.abs(
-            Math.floor(selected / p.cols) - Math.floor(p.goal / p.cols),
-          ) +
-            Math.abs((selected % p.cols) - (p.goal % p.cols))) *
-          min,
+        dr = Math.abs(Math.floor(selected / p.cols) - Math.floor(p.goal / p.cols)),
+        dc = Math.abs((selected % p.cols) - (p.goal % p.cols)),
+        h = (config.heuristic === 'zero' ? 0 : config.heuristic === 'euclidean' ? Math.hypot(dr, dc) : dr + dc) * min,
         g = s?.g[selected],
         parent = s?.parents[selected];
       detail += `<h3 style="margin-top:16px">Cell (${Math.floor(selected / p.cols) + 1}, ${(selected % p.cols) + 1})</h3><dl><dt>Terrain cost</dt><dd>${p.cells[selected] || "wall"}</dd><dt>g / h / f</dt><dd>${format(g)} / ${h} / ${format(g + h)}</dd><dt>Parent</dt><dd>${parent == null ? "None" : `${Math.floor(parent / p.cols) + 1},${(parent % p.cols) + 1}`}</dd></dl>`;

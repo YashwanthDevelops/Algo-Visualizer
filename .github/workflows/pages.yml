@@ -32,6 +32,11 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      - name: Build hero React component
+        run: |
+          npm run typecheck
+          npm run build:glyph
+
       - name: Run browser smoke check
         run: npm run smoke:browser
 

@@ -1,0 +1,34 @@
+/* Shared graphite study layout with a stable square Sudoku board. */
+body.is-sudoku{background:#101010;color:#f5f5f5}
+body.is-sudoku>.sidebar,body.is-sudoku #main>.topbar{display:none}
+body.is-sudoku #main{margin-left:0}
+body.is-sudoku #app{zoom:1.2;max-width:1328px;padding:44px 64px 48px;margin:auto;animation:pf-arrive .18s ease-out}
+.sudoku-study .pf-notebook{height:680px}
+.sudoku-map-column{height:680px;min-width:0;display:grid;grid-template-rows:minmax(0,1fr) 36px 60px 24px;gap:12px}
+.sudoku-board-frame{position:relative;min-height:0;min-width:0;display:grid;grid-template-rows:20px minmax(0,1fr) 20px;gap:12px;padding:16px;border:1px solid #383e3b;border-radius:10px;background:#171b19;overflow:hidden}
+.sudoku-topline{display:flex;justify-content:space-between;gap:8px;color:#aeb8b2;font-size:10px}
+.sudoku-study .sudoku-board-space{min-height:0;min-width:0;display:grid;place-items:center;container-type:size}
+.sudoku-study .sudoku-board{width:min(100cqw,100cqh);max-width:none;aspect-ratio:1;border:2px solid #829087;border-radius:5px;overflow:hidden;display:grid;grid-template-rows:repeat(9,minmax(0,1fr));grid-template-columns:repeat(9,minmax(0,1fr));box-sizing:border-box}
+.sudoku-study .sudoku-cell{aspect-ratio:1;background:#1c2420;border-color:#3e4942;transition:background-color .12s ease,outline-color .12s ease}
+.sudoku-study .sudoku-cell:nth-child(3n){border-right-color:#829087}.sudoku-study .sudoku-cell:nth-child(n+19):nth-child(-n+27),.sudoku-study .sudoku-cell:nth-child(n+46):nth-child(-n+54){border-bottom-color:#829087}
+.sudoku-study .sudoku-cell input{font:400 clamp(14px,3cqw,23px)/1 "SD Inter",Arial,sans-serif;color:#bdcbbd;opacity:1;transition:color .12s ease;background:transparent;cursor:default}
+.sudoku-study .sudoku-cell.given input{background:#27312b;color:#f1f1e8;font-weight:600}
+.sudoku-study .sudoku-cell.current{outline:2px solid #b7c7b9;outline-offset:-2px;background:#33463a;z-index:1}
+.sudoku-study .sudoku-cell.rejected{outline-color:#d6a399;background:#49342f}
+.sudoku-study[data-editing=true] .sudoku-cell input{cursor:text}.sudoku-study .sudoku-cell:focus-within{outline:2px solid #eef1e8;outline-offset:-2px;z-index:2}
+.sudoku-study .domains{font:9px/1 "SD Inter",Arial,sans-serif;color:#9bab9f;padding:3px;gap:1px}.sudoku-study .domains[hidden]{display:none}.sudoku-study .domains .is-removed{background:#704a3d;border-radius:2px}
+.sudoku-legend{display:flex;justify-content:center;gap:16px;color:#9daaa1;font-size:9px;white-space:nowrap}
+.sudoku-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:center}.sudoku-summary span{display:block;color:#9ba79f;font-size:10px}.sudoku-summary strong{font:500 19px/1.4 "SD Aeonik",Arial,sans-serif;font-variant-numeric:tabular-nums;color:#edf1ed}
+.sudoku-study .pf-rule{height:64px}.sudoku-study .pf-current{height:108px}.sudoku-study .pf-reason{height:80px;line-height:18px}
+.sudoku-decision{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;margin:8px 0 0;font-size:11px}.sudoku-decision dt,.sudoku-decision dd{margin:0;padding:7px 0;border-bottom:1px solid #303630}.sudoku-decision dt{color:#a6b0a8}.sudoku-decision dd{color:#e7ece7;text-align:right;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;min-height:18px}
+.sudoku-study .pf-side-tools .field{margin-bottom:18px}.sudoku-study .sudoku-final-note{margin-top:18px;color:#aab4ad;font-size:12px}
+.sudoku-study .pf-comparison-dialog .sudoku-board{width:min(100%,300px)}
+@media(max-width:1100px){body.is-sudoku #app{padding-inline:32px}}
+@media(min-width:601px) and (max-width:991px){body.has-site-nav.is-sudoku{padding-top:72px}}
+@media(max-width:800px){.sudoku-study .pf-workspace{grid-template-columns:1fr}}
+@media(max-width:600px){body.is-sudoku #app{padding:32px 20px}.sudoku-map-column{height:550px}.sudoku-board-frame{padding:10px;gap:8px}.sudoku-legend{gap:7px;font-size:7px}.sudoku-summary{gap:7px}.sudoku-summary span{font-size:8px}.sudoku-summary strong{font-size:16px}.sudoku-study .pf-save{flex-direction:column;align-items:flex-end;gap:2px}.sudoku-study .pf-heading p{max-width:240px}.sudoku-study .domains{font-size:7px;padding:2px}}
+@media(prefers-reduced-motion:reduce){body.is-sudoku #app{animation:none}.sudoku-study .sudoku-cell,.sudoku-study .sudoku-cell input{transition:none}}
+
+.sudoku-study .sudoku-cell.is-assigned input{animation:sudoku-digit-enter .14s ease-out}
+@keyframes sudoku-digit-enter{from{opacity:.45}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.sudoku-study .sudoku-cell.is-assigned input{animation:none}}

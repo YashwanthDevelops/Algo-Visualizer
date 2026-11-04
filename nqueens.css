@@ -1,0 +1,60 @@
+/* N-Queens shares the Pathfinding study controls and graphite surfaces. */
+body.is-optimization { background:#101010; color:#f5f5f5; }
+body.is-optimization>.sidebar,body.is-optimization #main>.topbar { display:none; }
+body.is-optimization #main { margin-left:0; }
+body.is-optimization #app { zoom:1.2; max-width:1328px; padding:44px 64px 48px; margin:auto; animation:pf-arrive .18s ease-out; }
+.nq-page .pf-notebook { height:680px; }
+.nq-map-column { min-width:0; height:680px; display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr) 36px 52px 96px 24px; gap:10px; }
+.nq-board-frame { position:relative; min-width:0; min-height:0; padding:14px; display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:18px minmax(0,1fr); gap:10px; border:1px solid #383e3b; border-radius:10px; background:#171b19; overflow:hidden; }
+.nq-board-topline { display:flex; justify-content:space-between; gap:12px; color:#9ba79f; font-size:10px; }
+.nq-board-space { min-width:0; min-height:0; display:grid; place-items:center; container-type:size; }
+.nq-board { display:block; width:min(100%,360px); width:min(100cqw,100cqh); height:auto; aspect-ratio:1; border:1px solid #4b5550; border-radius:7px; overflow:hidden; }
+.nq-cell .dark { fill:#242c28; }.nq-cell .light { fill:#4a554e; }
+.nq-coordinate { fill:#aab6ad; font:10px "SD Inter",Arial,sans-serif; pointer-events:none; }
+.nq-cell rect { stroke:#ffffff05; stroke-width:.5; }
+.nq-cell:hover rect,.nq-cell:focus-visible rect { stroke:#dfe8df; stroke-width:2px; }
+.nq-cell:focus { outline:none; }
+.nq-page[data-tool=pf-editor][data-locked=false] .nq-cell { cursor:pointer; }
+.nq-queen { color:#eeeede; pointer-events:none; transition:transform var(--nq-motion,0ms) ease-out; }
+.nq-proposal { pointer-events:none; fill:#b3c6a82b; stroke:#d2dfc8; stroke-width:1.5px; }
+.nq-proposal[data-rejected=true] { fill:#c9948320; stroke:#c99483; }
+.nq-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; align-items:center; }
+.nq-summary span { display:block; color:#9ba79f; font-size:10px; white-space:nowrap; }
+.nq-summary strong { display:block; color:#edf1ed; font:500 19px/1.4 "SD Aeonik",Arial,sans-serif; font-variant-numeric:tabular-nums; }
+.nq-chart { min-height:0; border:1px solid #303732; border-radius:8px; background:#151916; padding:5px 12px; overflow:hidden; }
+.nq-chart .score-chart { display:block; width:100%; height:100%; }
+.nq-chart .score-chart text { font:14px "SD Inter",Arial,sans-serif; fill:#9ba79f; }
+.nq-chart .score-chart polyline { stroke:#b3c6a8; }.nq-chart .score-chart polyline+polyline { stroke:#b1b8b2; }
+.nq-decision-values { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0; margin:8px 0 0; font-size:11px; font-variant-numeric:tabular-nums; }
+.nq-decision-values dt,.nq-decision-values dd { margin:0; padding:6px 0; border-bottom:1px solid #303630; }
+.nq-decision-values dt { color:#a6b0a8; }.nq-decision-values dd { color:#e7ece7; text-align:right; }
+.nq-page .pf-rule { height:62px; }
+.nq-page .pf-current { height:96px; }
+.nq-page .pf-reason { height:70px; line-height:18px; }
+.nq-page .pf-code { margin-top:20px; }
+.nq-page .pf-code-lines li { height:30px; min-height:30px; line-height:30px; }
+.nq-page .pf-code-lines li code,.nq-page .pf-code-lines li span { line-height:30px; }
+.nq-page .nq-setup .pf-selectors { gap:20px; flex-wrap:wrap; }
+.nq-page .nq-setup .field { min-width:0; }
+.nq-page .nq-setup .pf-number-field { display:block; width:114px; }
+.nq-page .nq-setup .pf-number-field>label { margin-bottom:5px; }
+.nq-page .nq-setup .pf-number-control { height:36px; grid-template-columns:30px minmax(0,1fr) 30px; }
+.nq-page .nq-setup .pf-number-step { width:30px; }
+.nq-page .pf-side-tools .pf-tool-content>.field { margin-bottom:18px; }
+.nq-page #queen-rows { width:100%; margin:6px 0; background:#1b211d; color:#edf1ed; border:1px solid #3d4641; border-radius:8px; font:12px/1.6 "SD Inter",Arial,sans-serif; }
+.nq-page #queen-help { display:block; font-size:10px; color:#9ba79f; margin-bottom:12px; }
+.nq-page .nq-candidate-list { border:1px solid #303732; border-radius:8px; overflow:auto; }
+.nq-page .nq-candidate-list p { padding:14px; margin:0; }
+.nq-page .compact-table { font-size:10px; font-variant-numeric:tabular-nums; }
+.nq-page .compact-table th { position:sticky; top:0; background:#1b211d; }
+.nq-page .compact-table td,.nq-page .compact-table th { padding:9px 7px; border-color:#303732; }
+.nq-page .nq-final-note { margin-top:16px; }
+.nq-page .pf-comparison-dialog .compare-visual { height:240px; display:grid; place-items:center; container-type:size; }
+.nq-page .pf-comparison-dialog .nq-board { width:min(100cqw,100cqh); }
+@media(max-width:1100px){body.is-optimization #app{padding-inline:32px}.nq-page .nq-setup .pf-selectors{gap:14px}.nq-page .pf-selectors .select-control{width:150px}.nq-page .pf-setup{flex-wrap:wrap}.nq-page .pf-code-lines li code{font-size:9px}}
+@media(min-width:601px) and (max-width:991px){body.has-site-nav.is-optimization{padding-top:72px}}
+@media(max-width:800px){.nq-page .pf-workspace{grid-template-columns:1fr}.nq-page .pf-notebook{height:680px}.nq-page .pf-selectors{display:flex;flex-wrap:wrap}.nq-page .pf-selectors .field{display:block}.nq-page .pf-selectors .select-control{width:100%}.nq-page .pf-setup{align-items:flex-end}.nq-page .pf-selectors .field{flex:1 1 140px}.nq-page .pf-selectors .pf-number-field{flex:0 0 114px}}
+@media(max-width:600px){body.is-optimization #app{padding:32px 20px}.nq-page .pf-heading p{max-width:240px}.nq-map-column{height:610px}.nq-page .pf-setup{gap:14px}.nq-page .pf-selectors{flex-basis:100%;gap:12px}.nq-page .nq-summary{gap:8px}.nq-summary span{font-size:8px;white-space:normal}.nq-summary strong{font-size:18px}.nq-page .pf-map-column{height:auto}.nq-page .pf-notebook{padding:18px}.nq-page .pf-primary{width:144px;flex-basis:144px}.nq-page .pf-save button{font-size:10px}.nq-board-frame{padding:10px}}
+@media(prefers-reduced-motion:reduce){body.is-optimization #app{animation:none}.nq-queen{transition:none!important}}
+@media(max-width:600px){.nq-page .pf-save{flex-direction:column;align-items:flex-end;gap:2px}}
+@media(prefers-reduced-motion:reduce){.nq-page .pf-back svg{transition:none;transform:none}}

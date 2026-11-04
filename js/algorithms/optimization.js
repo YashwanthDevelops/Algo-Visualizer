@@ -6,6 +6,23 @@ export function conflicts(q) {
       if (q[a] === q[b] || Math.abs(q[a] - q[b]) === b - a) s++;
   return s;
 }
+function exactSolution(n) {
+  const placement=Array(n).fill(-1);
+  let evaluations=0;
+  function place(col,rows,down,up){
+    if(col===n)return true;
+    for(let row=0;row<n;row++){
+      const bit=1<<row, d=1<<(row-col+n-1), u=1<<(row+col);
+      evaluations++;
+      if((rows&bit)||(down&d)||(up&u))continue;
+      placement[col]=row;
+      if(place(col+1,rows|bit,down|d,up|u))return true;
+    }
+    placement[col]=-1;
+    return false;
+  }
+  return {queens:place(0,0,0,0)?placement:null,evaluations};
+}
 export function optimization(config, trace = true) {
   return timed(() => {
     const rec = recorder(trace),
@@ -43,6 +60,7 @@ export function optimization(config, trace = true) {
       worseAccepted: 0,
       sidewaysMoves: 0,
       restarts: 0,
+      recoveryEvaluations: 0,
     };
     const record = (event, line, reason, final = false) => {
       if (score < best) {
@@ -212,6 +230,21 @@ export function optimization(config, trace = true) {
         break;
       }
     }
+    if(score>0){
+      const localStatus=status, recovered=exactSolution(n);
+      candidates=[];
+      metrics.recoveryEvaluations=recovered.evaluations;
+      if(recovered.queens){
+        for(let col=0;col<n;col++){
+          const before=score;
+          q[col]=recovered.queens[col];score=conflicts(q);
+          candidate={col,row:q[col],score,delta:score-before,accepted:true,recovery:true};
+          record('recovery',4,`Local search stopped at ${localStatus.replaceAll('-',' ')}. Exact completion places the queen in column ${col+1}, row ${q[col]+1}; ${score} conflicts remain.`);
+        }
+        chart.push({iteration:metrics.iterations,score,best});
+        status='solved-after-recovery';
+      }else status='no-solution';
+    }
     metrics.currentScore = score;
     metrics.bestScore = best;
     record(
@@ -219,6 +252,10 @@ export function optimization(config, trace = true) {
       4,
       status === "solved"
         ? "Zero attacking pairs: a valid N-Queens solution."
+        : status === "solved-after-recovery"
+          ? "Local search stalled. The exact completion phase found a valid arrangement with zero attacking pairs."
+          : status === "no-solution"
+            ? `No solution exists for a ${n}-queen board.`
         : `Stopped: ${status.replaceAll("-", " ")}. Best conflict score = ${best}; this is not a proof of impossibility.`,
       true,
     );

@@ -1,0 +1,14 @@
+/* Keep the workbench below the shared navigation; dashboard fills its canvas. */
+body.has-site-nav:not(.is-dashboard) { padding-top: 91px; }
+body.has-site-nav:not(.is-dashboard) .sidebar { top: 91px; }
+body.is-dashboard { background: #101010; }
+body.is-dashboard > .sidebar, body.is-dashboard #main > .topbar { display: none; }
+body.is-dashboard #main { margin-left: 0; }
+body.is-dashboard #app { max-width: none; padding: 0; }
+@media (max-width: 600px) {
+  body.has-site-nav:not(.is-dashboard) { padding-top: 56px; }
+  body.has-site-nav:not(.is-dashboard) .sidebar { top: 56px; }
+}
+
+.sidebar .brand { font: 500 20px/1.2 "SD Aeonik", Arial, sans-serif; letter-spacing: -.035em; }
+@media (max-width: 760px) { .sidebar .brand { font-size: 18px; } }

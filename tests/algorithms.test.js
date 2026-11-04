@@ -156,15 +156,18 @@ test("recorded snapshots are independent; previous/seek reproduce exact earlier 
   player.reset();
   assert.equal(current, null);
 });
-test("N-Queens scores each pair once and identifies solved and stalled positions", () => {
+test("N-Queens scores each pair once and recovers valid boards after local-search stalls", () => {
   assert.equal(conflicts([1, 3, 0, 2]), 0);
   assert.equal(conflicts([0, 0, 0, 0]), 6);
   const c = { ...fresh("optimization"), problem: { queens: [0, 1, 3, 2] } };
   const r = execute("optimization", c);
-  assert.equal(r.status, "plateau");
-  assert.equal(r.metrics.bestScore, 2);
+  assert.equal(r.status, "solved-after-recovery");
+  assert.equal(r.metrics.bestScore, 0);
   assert.equal(r.metrics.candidateEvaluations, 13);
   assert.equal(r.metrics.iterations, 1);
+  assert.equal(conflicts(r.output.queens),0);
+  assert(r.metrics.recoveryEvaluations>0);
+  assert.equal(r.steps.at(-1).event,'solved-after-recovery');
   assert.equal(
     execute("optimization", { ...c, problem: { queens: [1, 3, 0, 2] } }).status,
     "solved",
@@ -223,8 +226,18 @@ test("strict local minimum preset has score one and every neighbor is worse", ()
     ...fresh("optimization"),
     problem: { queens: q },
   });
-  assert.equal(result.status, "local-minimum");
-  assert.equal(result.metrics.bestScore, 1);
+  assert.equal(result.status, "solved-after-recovery");
+  assert.equal(result.metrics.bestScore, 0);
+  assert.equal(conflicts(result.output.queens),0);
+});
+test("N-Queens exact completion finds solutions at every supported board size",()=>{
+  for(let n=4;n<=12;n++){
+    const result=execute('optimization',{...fresh('optimization'),problem:{queens:Array(n).fill(0)},limit:1});
+    assert.equal(result.status,'solved-after-recovery',`${n} queens`);
+    assert.equal(result.output.queens.length,n);
+    assert.equal(conflicts(result.output.queens),0,`${n} queens`);
+    assert(result.steps.some(step=>step.event==='recovery'));
+  }
 });
 test("Minimax and alpha-beta agree; winning and blocking decisions are legal", () => {
   const positions = [

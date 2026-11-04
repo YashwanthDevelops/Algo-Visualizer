@@ -1,3 +1,15 @@
+import { timetablePage, mountTimetableRenderer } from './timetable-view.js?v=calendar-4';
+import { parseTimetableJSON } from './timetable-data.js?v=calendar-4';
+import { dashboardHTML, mountDashboardMotion } from "./dashboard-view.js?v=hero-glyph-1";
+import { mountSiteNavigation } from "./site-navigation.js?v=routing-1";
+import { mountDocumentPage } from "./document-view.js";
+import { pathfindingPage, pathfindingDecision } from "./pathfinding-view.js";
+import { mountPathfindingRenderer } from "./pathfinding-renderer.js";
+import { mountStudySelects } from "./study-select.js";
+import { mountPathfindingTools } from "./pathfinding-tools.js";
+import {nqueensPage, mountNQueensRenderer, queensStudySVG} from './nqueens-view.js';
+import { sudokuPage, mountSudokuRenderer } from './sudoku-view.js';
+import { gamePage, mountGameRenderer } from './game-view.js';
 import { clone, escapeHTML as e, labels } from "./core.js";
 import { icon } from "./icons.js";
 import {
@@ -9,7 +21,7 @@ import {
   timetablePreset,
 } from "./models.js";
 import { winner } from "./algorithms/game.js";
-import { timetableModel } from "./algorithms/csp.js";
+import { timetableModel } from "./algorithms/csp.js?v=calendar-4";
 import { Playback } from "./playback.js";
 import {
   load,
@@ -21,7 +33,7 @@ import {
 } from "./storage.js";
 import { validateConfiguration } from "./validation.js";
 import { lessonHTML } from "./lessons.js";
-import { mountQuestionWorkspace } from "./question-workspace.js";
+import { mountQuestionWorkspace } from "./question-workspace.js?v=analysis-orb-1";
 import {
   labNames,
   descriptions,
@@ -37,7 +49,7 @@ import {
   timetableHTML,
   treeHTML,
   explanationHTML,
-} from "./renderers.js";
+} from "./renderers.js?v=calendar-4";
 
 const app = document.getElementById("app"),
   data = load(),
@@ -45,15 +57,8 @@ const app = document.getElementById("app"),
     dashboard: "Dashboard",
     ...labNames,
     "question-visualizer": "Question Visualizer",
-  },
-  labIcons = {
-    dashboard: "squares-four",
-    pathfinding: "path",
-    optimization: "crown-simple",
-    game: "strategy",
-    sudoku: "grid-nine",
-    timetable: "calendar-dots",
-    "question-visualizer": "path",
+    reference: "Reference",
+    guide: "Guide",
   };
 const configs = Object.fromEntries(
   Object.keys(labNames).map((lab) => [
@@ -76,13 +81,29 @@ let lab = "dashboard",
   dashboardLab = "pathfinding",
   dashboardExperiment = null,
   pendingComparison = null,
-  paintStroke = false,
-  paintChanged = false,
-  skipCellClick = false,
   historyUndo = null,
   visualCompare = null,
   compareWorker = null;
 let questionWorkspace = null;
+let cleanupDashboard = null;
+let cleanupDocument = null;
+let navigating = false;
+let nqRenderer=null, nqTools=null, nqDropdowns=null, nqKey=null, nqExtras=null, nqRendering=false;
+let gameRenderer=null, gameTools=null, gameDropdowns=null, gameKey=null, gameExtras=null, gameRendering=false;
+let gameDelayTimer=null;
+let timetableUploadId=0;
+const timetableUI={renderer:null,tools:null,dropdowns:null,key:null,extras:null,rendering:false};
+const sudokuUI={renderer:null,tools:null,dropdowns:null,key:null,extras:null,rendering:false};
+const siteNavigation = mountSiteNavigation(document.getElementById("site-navigation"), {
+  onSameRoute() {
+    if (lab === "question-visualizer") questionWorkspace?.showUpload();
+    const section = new URLSearchParams(location.hash.split("?")[1] || "").get("section");
+    if (lab === "dashboard" && ["compare", "history"].includes(section)) jumpDashboard(section);
+    else window.scrollTo({top: 0, behavior: "instant"});
+  },
+});
+document.body.classList.add("has-site-nav");
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 const playback = new Playback(updateFrame, updateControls);
 const settingsMedia = window.matchMedia("(min-width:768px)");
 let settingsExpanded = settingsMedia.matches;
@@ -101,6 +122,16 @@ function notify(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove("visible"), 5000);
 }
+function animateGameMove(index) {
+  requestAnimationFrame(() => {
+    const cell=app.querySelector(`[data-game="${index}"]`);
+    if(!cell)return;
+    cell.classList.remove('is-placing');
+    void cell.offsetWidth;
+    cell.classList.add('is-placing');
+    cell.addEventListener('animationend',()=>cell.classList.remove('is-placing'),{once:true});
+  });
+}
 function persist() {
   data.configs = clone(configs);
   if (!save(data))
@@ -114,6 +145,8 @@ function remember(entry) {
   persist();
 }
 function cancel() {
+  clearTimeout(gameDelayTimer);
+  gameDelayTimer=null;
   requestId++;
   worker?.terminate();
   compareWorker?.terminate();
@@ -133,6 +166,52 @@ function reset() {
   render();
 }
 function navigate() {
+  const requestedHash = location.hash.slice(1).split("?")[0];
+  const sharedLab = new URLSearchParams(location.search).get("lab");
+  const requestedLab = sharedLab && Object.hasOwn(labNames, sharedLab)
+    ? sharedLab
+    : Object.hasOwn(names, requestedHash) ? requestedHash : "dashboard";
+  const hasOutgoingPage = app.childNodes.length > 0 && requestedLab !== lab;
+  const motionAllowed = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const animateEntry = hasOutgoingPage && motionAllowed;
+  const commit = (fallbackEntry = false) => {
+    // Playback emits callbacks even when reset/paused. Keep those callbacks away
+    // from the outgoing DOM until the destination has been mounted.
+    navigating = true;
+    try { performNavigation(); }
+    finally { navigating = false; }
+    if (fallbackEntry) {
+      app.classList.remove("algoai-page-enter");
+      void app.offsetWidth;
+      app.classList.add("algoai-page-enter");
+      app.addEventListener("animationend", (event) => {
+        if (event.animationName === "algoai-page-enter") app.classList.remove("algoai-page-enter");
+      }, { once: true });
+    }
+    updateFrame(playback.steps[playback.index] || null);
+    updateControls();
+  };
+
+  if (animateEntry && typeof document.startViewTransition === "function") {
+    document.startViewTransition(() => commit());
+    return;
+  }
+  // Older browsers still get the short entrance motion without a dependency.
+  // The first render and reduced-motion mode remain immediate.
+  commit(animateEntry);
+}
+function performNavigation() {
+  cleanupDocument?.();
+  cleanupDocument = null;
+  timetableUploadId++;timetableUI.tools?.destroy();timetableUI.dropdowns?.destroy();timetableUI.renderer?.destroy();Object.assign(timetableUI,{renderer:null,tools:null,dropdowns:null,key:null,extras:null});
+  sudokuUI.tools?.destroy();sudokuUI.dropdowns?.destroy();sudokuUI.renderer?.destroy();Object.assign(sudokuUI,{renderer:null,tools:null,dropdowns:null,key:null,extras:null});
+  gameTools?.destroy();gameTools=null;gameDropdowns?.destroy();gameDropdowns=null;gameRenderer=null;gameKey=null;
+  nqTools?.destroy();nqTools=null;nqDropdowns?.destroy();nqDropdowns=null;nqRenderer?.destroy();nqRenderer=null;nqKey=null;
+  pfTools?.destroy(); pfTools = null;
+  pfDropdowns?.destroy();
+  pfDropdowns = null; pfRenderer = null; pfConfigKey = null;
+  cleanupDashboard?.();
+  cleanupDashboard = null;
   questionWorkspace?.destroy();
   questionWorkspace = null;
   cancel();
@@ -152,6 +231,13 @@ function navigate() {
         configs[sharedLab] = validateConfiguration(sharedLab, decoded.config);
         hash = sharedLab;
         persist();
+        // Shared configuration links are one-time imports. Remove their query
+        // parameters so later hash navigation can select another page normally.
+        const cleanUrl = new URL(location.href);
+        cleanUrl.searchParams.delete("lab");
+        cleanUrl.searchParams.delete("config");
+        cleanUrl.hash = sharedLab;
+        history.replaceState(null, "", cleanUrl);
         notify("Shared configuration loaded and validated.");
       }
     } catch (error) {
@@ -159,8 +245,19 @@ function navigate() {
     }
   }
   lab = Object.hasOwn(names, hash) ? hash : "dashboard";
+  if (hash && !Object.hasOwn(names, hash)) {
+    history.replaceState(null, "", `${location.pathname}${location.search}#dashboard`);
+    notify("That page could not be found. Open a page from the navigation.");
+  }
+  playback.useAnimationFrame = ['pathfinding','optimization','sudoku','timetable'].includes(lab);
   playback.reset();
+  window.scrollTo(0, 0);
   render();
+  if(lab==='game'&&cfg().problem.turn===cfg().problem.ai&&!winner(cfg().problem.board))run(true);
+  const dashboardSection = new URLSearchParams(location.hash.split("?")[1] || "").get("section");
+  if (lab === "dashboard" && ["compare", "history"].includes(dashboardSection)) {
+    jumpDashboard(dashboardSection, false);
+  }
   if (data.recoveryWarnings?.length) notify(data.recoveryWarnings.join(" "));
   if (pendingComparison === lab) {
     pendingComparison = null;
@@ -246,7 +343,7 @@ function settingsHTML() {
         "number",
         'min="1" max="99" step="1"',
       ) +
-      `<p class="hint">Click or drag to edit cells. Arrow keys move focus; Space/Enter applies the selected brush. Four-direction movement pays the cost of entering the next cell.</p>`;
+      `<p class="hint">Click a cell to edit it. Arrow keys move focus; Space/Enter applies the selected brush. Four-direction movement pays the cost of entering the next cell.</p>`;
   if (lab === "optimization")
     extra =
       field(
@@ -374,32 +471,13 @@ function settingsHTML() {
 function playbackHTML() {
   return `<div class="playback"><div class="playback-buttons"><button id="run" class="primary" data-action="run">${icon("play")}<span class="button-text">Run</span></button><button id="pause" data-action="pause">${icon("pause")}Pause</button><button id="previous" data-action="previous">${icon("skip-back")}Previous</button><button id="next" data-action="next">${icon("skip-forward")}Next</button><button data-action="jump-prev">${icon("skip-back")}Key event</button><button data-action="jump-next">Key event ${icon("skip-forward")}</button><button id="reset" data-action="reset">${icon("arrow-counter-clockwise")}Reset</button><span class="step-count" id="step-count">Ready</span></div><div class="timeline"><div><label for="scrub">Recorded decisions <span id="event-progress">0</span></label><div class="timeline-track"><input type="range" id="scrub" min="0" max="0" value="0" aria-label="Seek a recorded step"><div id="timeline-markers" aria-hidden="true"></div></div><small id="trace-gap-label" class="hint"></small></div><div><label for="speed">Speed <span id="speed-label">${playback.speed} steps/s</span></label><input type="range" id="speed" min="1" max="30" value="${playback.speed}"></div></div><p class="playback-hint">Space play/pause · ← / → step · J / K previous/next key event</p></div>`;
 }
-function gameHTML(frame) {
-  const c = cfg(),
-    win = winner(c.problem.board),
-    human = c.problem.ai === "X" ? "O" : "X",
-    canMove = !busy && !win && c.problem.turn === human;
-  const message = win
-    ? win === "draw"
-      ? "Game over · draw"
-      : `Game over · ${win} wins`
-    : busy
-      ? "Computing the AI decision…"
-      : c.problem.turn === human
-        ? `Your turn · ${human}`
-        : result
-          ? "AI decision ready · replay or play the move"
-          : `AI to move · ${c.problem.ai}`;
-  return `<div class="game-layout"><div><div class="game-board" aria-label="Tic-Tac-Toe board">${c.problem.board.map((v, i) => `<button data-game="${i}" class="${v.toLowerCase()}" ${!canMove || v ? "disabled" : ""} aria-label="Square ${i + 1}, ${v || "empty"}">${v || ""}</button>`).join("")}</div><p class="game-message">${e(message)}</p>${result?.output.move !== null && result && c.problem.turn === c.problem.ai && !win ? `<button class="primary" data-action="apply-ai">${icon("play")}Play AI move · #${result.output.move + 1}</button>` : ""}${frame ? `<p class="hint" style="margin-top:14px">Current search position · depth ${frame.state.depth || 0}</p><div style="width:70px">${miniBoard(frame.state.board)}</div>` : ""}<button data-action="new-game" class="small-button" style="margin-top:14px">${icon("arrow-counter-clockwise")}New game</button></div><div><div class="subheading" style="margin-bottom:10px">SEARCH TREE · EXPAND A NODE</div>${result ? `<button data-action="focus-branch" class="small-button" style="margin-bottom:10px">${icon("tree-structure")}Reveal current branch</button>` : ""}${result?.output.treeTruncated ? `<p class="hint">Retained ${result.output.treeRetained.toLocaleString()} nodes including the top two levels; all ${result.metrics.nodesEvaluated.toLocaleString()} nodes were evaluated. Use a midgame for a smaller full tree.</p>` : ""}<div class="tree-container" id="tree">${treeHTML(result?.output.tree, frame ? { ...frame, ai: c.problem.ai } : null, openNodes)}</div></div></div>`;
-}
 function visualHTML(frame) {
-  if (busy)
+  if (busy && lab !== "pathfinding")
     return '<div class="loading">Computing in a Web Worker…<br><small>Reset cancels this computation.</small></div>';
   const c = cfg(),
     s = frame?.state;
   if (lab === "pathfinding") {
-    const width = c.problem.cols * 36 * gridZoom;
-    return `<div class="grid-scroll">${pathSVG(c.problem, s, selected).replace('class="grid-svg"', `class="grid-svg" style="width:${width}px;max-width:none"`)}</div><div class="legend"><span><b>S / G</b>start / goal</span><span><b>×</b>wall</span><span><b>9</b>entry cost</span><span><b>◎</b>current</span><span><b>○</b>frontier</span><span><b>·</b>expanded</span><span><b>↗</b>path</span></div>`;
+    return `<div class="grid-scroll">${pathSVG(c.problem, s, selected, false, true).replace('class="grid-svg"', `class="grid-svg" style="width:${gridZoom * 100}%;height:${gridZoom * 100}%;max-width:none"`)}</div>`;
   }
   if (lab === "optimization") {
     const q = s?.queens || c.problem.queens;
@@ -417,7 +495,6 @@ function visualHTML(frame) {
         : ""
     }`;
   }
-  if (lab === "game") return gameHTML(frame);
   if (lab === "sudoku")
     return `${sudokuHTML(c, s)}<div class="legend"><span><b>Bold</b>given clue</span><span><b>Small digits</b>domain</span><span><b>Outline</b>current variable</span><span><b>Reject</b>explained alongside</span></div>`;
   return `${timetableHTML(c.problem, s)}<div class="legend"><span><b>×</b>unavailable room</span><span><b>Free</b>available slot</span><span><b>Session label</b>assigned placement</span></div>`;
@@ -472,8 +549,9 @@ function visualComparisonBoardsHTML() {
       let view = "";
       if (lab === "pathfinding") view = pathSVG(cfg().problem, state);
       if (lab === "optimization")
-        view = queensSVG(
+        view = queensStudySVG(
           state?.queens || cfg().problem.queens,
+          false,
           state?.candidate,
         );
       if (lab === "sudoku") view = sudokuHTML(cfg(), state);
@@ -497,7 +575,259 @@ function comparisonHTML(entry) {
     rows = entry.results || entry;
   return `<div class="table-wrap"><table class="history-table"><thead><tr><th>Algorithm</th><th>Outcome</th>${metricKeys[target].map((key) => `<th>${metricLabels[key]}</th>`).join("")}${target === "optimization" ? "<th>Success rate</th>" : ""}</tr></thead><tbody>${rows.map((r) => `<tr><td>${e(labels[r.algorithm])}</td><td>${e(r.status)}</td>${metricKeys[target].map((key) => `<td class="mono">${format(r.metrics[key], key)}</td>`).join("")}${target === "optimization" ? `<td>${Math.round(r.successRate * 100)}% / ${r.trials} trials</td>` : ""}</tr>`).join("")}</tbody></table></div><p class="metric-guidance">${metricKeys[target].map((key) => `<b>${metricLabels[key]}:</b> ${metricDirection(key)}`).join(" ")}</p><p class="status-note">${target === "optimization" ? `20 paired trials on ${entry.config?.trialStarts === "random" ? "seeded random boards" : "the configured starting board"}, with consecutive seeds. Each trial uses the median of three trace-free timing repetitions; both algorithms receive identical inputs.` : "Medians over five trace-free runs after one warm-up, with the exact same input and ordering."} Computation excludes animation, DOM rendering, worker startup, and message transfer.</p>`;
 }
+let pathfindingOpenTools = new Set();
+let pfRenderer = null, pfDropdowns = null, pfTools = null, pfConfigKey = null, pfExtrasKey = null;
+let pfRendering = false;
+function syncPathfinding(frame) {
+  if (!pfRenderer) return;
+  app.setAttribute('aria-busy', String(busy));
+  pfRenderer.update({c:cfg(),frame,selected,busy,zoom:gridZoom,playback,result});
+  const locked = busy || !!playback.steps.length;
+  app.querySelectorAll('.pf-setup select, #pf-editor input:not(#grid-zoom), #pf-editor button, #pf-advanced [data-param]').forEach(el => {
+    const disabled = locked && el.dataset.brush !== 'inspect';
+    if (el.disabled !== disabled) el.disabled = disabled;
+  });
+  pfDropdowns?.sync();
+  if (busy || playback.timer) pfTools?.back();
+}
+function renderPathfinding() {
+  if (pfRendering) return;
+  pfRendering = true;
+  try { renderPathfindingContent(); } finally { pfRendering = false; }
+}
+function renderPathfindingContent() {
+  const c = cfg(), frame = playback.steps[playback.index];
+  const activeId = document.activeElement?.id;
+  const key = JSON.stringify([c,brush,weight]);
+  const html = () => pathfindingPage({ c, frame, busy, result, brush, weight, zoom: gridZoom, playback,
+    visual: visualHTML(frame), decision: pathfindingDecision(c, frame, selected),
+    fullExplanation: explanationHTML(lab, c, frame, selected) + lessonHTML(lab, result, frame),
+    metrics: metricsHTML(lab, frame?.metrics || {}), finalMetrics: metricsHTML(lab, result?.metrics || {}),
+    guide: guideHTML(), comparisons: visualComparisonHTML() + (comparison ? comparisonHTML(comparison) : ''),
+    comparisonControls: `<div class="visual-compare-controls"><label>Trace A<select id="visual-alg-a">${selectOptions(algorithms[lab], visualCompare?.left.algorithm || c.algorithm)}</select></label><label>Trace B<select id="visual-alg-b">${selectOptions(algorithms[lab].filter(a => a !== (visualCompare?.left.algorithm || c.algorithm)), visualCompare?.right.algorithm || algorithms[lab].find(a => a !== c.algorithm))}</select></label><button data-action="compare-visual" ${busy ? 'disabled' : ''}>Compare visual traces</button></div>`,
+    selectField, field, icon,
+  });
+
+  const extrasKey = [result,comparison,visualCompare];
+  if (pfRenderer && app.querySelector('.pf-page') && pfConfigKey === key) {
+    if (!pfExtrasKey || extrasKey.some((item,index)=>item!==pfExtrasKey[index])) {
+      const template = document.createElement('template'); template.innerHTML = html();
+      for (const id of ['pf-comparisons','pf-details']) {
+        const target = document.getElementById(id);
+        const content = template.content.querySelector(`#${id} .pf-tool-content`);
+        target.querySelector('.pf-tool-content').replaceWith(content);
+        const inspector = content.querySelector('#pf-algorithm');
+        inspector?.addEventListener('toggle',()=>{if(inspector.open) updateFrame(playback.steps[playback.index]);});
+        if (id==='pf-comparisons' && ((comparison && comparison!==pfExtrasKey?.[1]) || (visualCompare && visualCompare!==pfExtrasKey?.[2]))) pfTools?.show(id);
+      }
+      pfExtrasKey = extrasKey;
+    }
+    syncPathfinding(frame); updateControls(); return;
+  }
+  if (app.querySelector('.pf-page')) pathfindingOpenTools = new Set([...app.querySelectorAll('details[open]')].map(el=>el.id).filter(Boolean));
+  const toolMode = pfTools?.mode || '';
+  const compareOpen = pfTools?.compareOpen;
+  pfTools?.destroy();
+  pfDropdowns?.destroy();
+  pfTools = null; pfDropdowns = null;
+  app.innerHTML = html();
+  pfConfigKey = key; pfExtrasKey = extrasKey;
+  pfRenderer = mountPathfindingRenderer(app.querySelector('.pf-page'));
+  for (const id of pathfindingOpenTools) document.getElementById(id)?.setAttribute('open','');
+  pfTools = mountPathfindingTools(app.querySelector('.pf-page'), {
+    initialMode:toolMode,
+    pause:()=>playback.pause(),
+    onInspect:()=>updateFrame(playback.steps[playback.index]),
+    onLeaveEditor:()=>{
+      brush='inspect';pfConfigKey=JSON.stringify([cfg(),brush,weight]);
+      app.querySelectorAll('[data-brush]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.brush===brush)));
+      const costField = document.getElementById('weight')?.closest('.field');
+      if(costField)costField.hidden=true;
+    },
+  });
+  if(compareOpen)pfTools.show('pf-comparisons');
+  pfDropdowns = mountStudySelects(app.querySelector('.pf-page'));
+  app.querySelectorAll('details').forEach(el => el.addEventListener('toggle', () => {
+    if (el.open && el.id === 'pf-algorithm') updateFrame(playback.steps[playback.index]);
+  }));
+  syncPathfinding(frame);
+  if (activeId) document.getElementById(activeId)?.focus({preventScroll:true});
+  updateControls();
+}
+function syncNQueens(frame) {
+  if(!nqRenderer||!app.querySelector('.nq-page'))return;
+  nqRenderer.update({c:cfg(),frame,playback,busy,result});
+  const locked=busy||!!playback.steps.length;
+  app.querySelectorAll('.nq-setup input,.nq-setup select,.nq-setup .pf-number-step,#pf-editor input,#pf-editor button,#pf-advanced input[data-param],#pf-advanced .pf-number-step,[data-param="trialStarts"]').forEach(el=>el.disabled=locked);
+  app.querySelectorAll('.nq-page .pf-number-step').forEach(button=>{
+    const input=button.parentElement.querySelector('input');
+    button.disabled=locked||(Number(button.dataset.numberStep)<0?Number(input.value)<=Number(input.min):Number(input.value)>=Number(input.max));
+  });
+  app.querySelectorAll('.nq-page [data-action="compare"],.nq-page [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
+  nqDropdowns?.sync();
+  if(busy||playback.timer)nqTools?.back();
+}
+function renderNQueens() {
+  if(nqRendering)return;
+  nqRendering=true;
+  try {
+    const c=cfg(),key=JSON.stringify([c,[...openNodes]]),activeId=document.activeElement?.id;
+    const extras=[comparison,visualCompare];
+    const html=()=>nqueensPage({c,playback,selectField,icon,guide:guideHTML(),comparisons:visualComparisonHTML()+(comparison?comparisonHTML(comparison):''),comparisonControls:`<div class="visual-compare-controls"><label>Trace A<select id="visual-alg-a">${selectOptions(algorithms[lab],visualCompare?.left.algorithm||c.algorithm)}</select></label><label>Trace B<select id="visual-alg-b">${selectOptions(algorithms[lab].filter(a=>a!==(visualCompare?.left.algorithm||c.algorithm)),visualCompare?.right.algorithm||algorithms[lab].find(a=>a!==c.algorithm))}</select></label><button data-action="compare-visual">Compare visual traces</button></div>`});
+    if(nqRenderer&&nqKey===key&&app.querySelector('.nq-page')){
+      if(!nqExtras||extras.some((v,i)=>v!==nqExtras[i])){
+        const template=document.createElement('template');template.innerHTML=html();
+        document.querySelector('#pf-comparisons .pf-tool-content').replaceWith(template.content.querySelector('#pf-comparisons .pf-tool-content'));
+        if(comparison||visualCompare)nqTools.show('pf-comparisons');
+        nqExtras=extras;
+      }
+    }else{
+      const mode=nqTools?.mode||'',compareOpen=nqTools?.compareOpen;
+      nqTools?.destroy();nqDropdowns?.destroy();nqRenderer?.destroy();
+      app.innerHTML=html();nqKey=key;nqExtras=extras;
+      const root=app.querySelector('.nq-page');
+      nqRenderer=mountNQueensRenderer(root,{edit:(row,col)=>{
+        if(busy||playback.steps.length)return;
+        const id=`nq-cell-${row}-${col}`;cfg().problem.queens[col]=row;cfg().arrangement='custom';comparison=null;visualCompare=null;persist();renderNQueens();document.getElementById(id)?.focus({preventScroll:true});
+      }});
+      nqTools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncNQueens(playback.steps[playback.index]),onShow:()=>syncNQueens(playback.steps[playback.index]),onLeaveEditor:()=>{}});
+      if(compareOpen)nqTools.show('pf-comparisons');
+      nqDropdowns=mountStudySelects(root);
+      if(activeId)document.getElementById(activeId)?.focus({preventScroll:true});
+    }
+    updateControls();
+  }finally{nqRendering=false;}
+}
+function syncGameStudy(frame) {
+  if(!gameRenderer||!app.querySelector('.game-study'))return;
+  gameRenderer.update({c:configs.game,frame,busy,result,playback});
+  const locked=busy||!!playback.steps.length;
+  app.querySelectorAll('.game-setup select,#pf-advanced input,#pf-advanced select,#pf-advanced button').forEach(el=>{
+    if(el.matches('[data-action="new-game"]'))return;
+    el.disabled=locked;
+  });
+  app.querySelectorAll('.game-study [data-action="compare"],.game-study [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
+  gameDropdowns?.sync();
+  if(busy||playback.timer)gameTools?.back();
+}
+function renderGameStudy() {
+  if(gameRendering)return;
+  gameRendering=true;
+  try {
+    const c=cfg(),key=JSON.stringify(c),activeId=document.activeElement?.id;
+    const extras=[result,comparison,visualCompare];
+    const comparisonControls=`<div class="visual-compare-controls"><label>Trace A<select id="visual-alg-a">${selectOptions(algorithms[lab],visualCompare?.left.algorithm||c.algorithm)}</select></label><label>Trace B<select id="visual-alg-b">${selectOptions(algorithms[lab].filter(a=>a!==(visualCompare?.left.algorithm||c.algorithm)),visualCompare?.right.algorithm||algorithms[lab].find(a=>a!==c.algorithm))}</select></label><button data-action="compare-visual">Compare visual traces</button></div>`;
+    const tree=treeHTML(result?.output.tree,playback.steps[playback.index]?{...playback.steps[playback.index],ai:c.problem.ai}:null,openNodes);
+    const html=()=>gamePage({c,frame:playback.steps[playback.index],busy,result,playback,selectField,icon,guide:guideHTML(),tree,comparisons:visualComparisonHTML()+(comparison?comparisonHTML(comparison):''),comparisonControls});
+    if(gameRenderer&&gameKey===key&&app.querySelector('.game-study')){
+      if(!gameExtras||extras.some((v,i)=>v!==gameExtras[i])){
+        const template=document.createElement('template');template.innerHTML=html();
+        for(const id of ['pf-comparisons','pf-details']){
+          const content=template.content.querySelector(`#${id} .pf-tool-content`);
+          document.querySelector(`#${id} .pf-tool-content`)?.replaceWith(content);
+        }
+        if((comparison&&comparison!==gameExtras?.[1])||(visualCompare&&visualCompare!==gameExtras?.[2]))gameTools?.show('pf-comparisons');
+        gameExtras=extras;
+      }
+    }else{
+      const mode=gameTools?.mode||'',compareOpen=gameTools?.compareOpen;
+      gameTools?.destroy();gameDropdowns?.destroy();
+      app.innerHTML=html();gameKey=key;gameExtras=extras;
+      const root=app.querySelector('.game-study');
+      gameRenderer=mountGameRenderer(root,{treeHTML,metricsHTML,treeKey:()=>[...openNodes].join(',')});
+      gameTools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncGameStudy(playback.steps[playback.index]),onShow:()=>syncGameStudy(playback.steps[playback.index])});
+      if(compareOpen)gameTools.show('pf-comparisons');
+      gameDropdowns=mountStudySelects(root);
+      if(activeId)document.getElementById(activeId)?.focus({preventScroll:true});
+    }
+    syncGameStudy(playback.steps[playback.index]);
+    updateControls();
+  }finally{gameRendering=false;}
+}
+function syncSudoku(frame) {
+  if(!sudokuUI.renderer||!app.querySelector('.sudoku-study'))return;
+  app.setAttribute('aria-busy',String(busy));
+  sudokuUI.renderer.update({c:cfg(),frame,playback,busy,result,editing:sudokuUI.tools?.mode==='pf-editor'});
+  const locked=busy||!!playback.steps.length;
+  app.querySelectorAll('.sudoku-study .pf-setup select,.sudoku-study [data-param],.sudoku-study .pf-number-step,.sudoku-study [data-action="clear-sudoku"]').forEach(el=>el.disabled=locked);
+  app.querySelectorAll('.sudoku-study [data-action="compare"],.sudoku-study [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
+  sudokuUI.dropdowns?.sync();
+  if(busy||playback.timer)sudokuUI.tools?.back();
+}
+function renderSudoku() {
+  if(sudokuUI.rendering)return;
+  sudokuUI.rendering=true;
+  try {
+    const c=cfg(),key=JSON.stringify(c),extras=[comparison,visualCompare],activeId=document.activeElement?.id;
+    const html=()=>sudokuPage({c,playback,selectField,icon,guide:guideHTML(),comparisons:visualComparisonHTML()+(comparison?comparisonHTML(comparison):''),comparisonControls:`<div class="visual-compare-controls"><label>Trace A<select id="visual-alg-a">${selectOptions(algorithms[lab],visualCompare?.left.algorithm||c.algorithm)}</select></label><label>Trace B<select id="visual-alg-b">${selectOptions(algorithms[lab].filter(a=>a!==(visualCompare?.left.algorithm||c.algorithm)),visualCompare?.right.algorithm||algorithms[lab].find(a=>a!==c.algorithm))}</select></label><button data-action="compare-visual">Compare visual traces</button></div>`});
+    if(sudokuUI.renderer&&sudokuUI.key===key&&app.querySelector('.sudoku-study')){
+      if(!sudokuUI.extras||extras.some((v,i)=>v!==sudokuUI.extras[i])){
+        const t=document.createElement('template');t.innerHTML=html();
+        document.querySelector('#pf-comparisons .pf-tool-content').replaceWith(t.content.querySelector('#pf-comparisons .pf-tool-content'));
+        if(comparison||visualCompare)sudokuUI.tools.show('pf-comparisons');
+        sudokuUI.extras=extras;
+      }
+    }else{
+      const mode=sudokuUI.tools?.mode||'',compareOpen=sudokuUI.tools?.compareOpen;
+      sudokuUI.tools?.destroy();sudokuUI.dropdowns?.destroy();sudokuUI.renderer?.destroy();
+      app.innerHTML=html();sudokuUI.key=key;sudokuUI.extras=extras;
+      const root=app.querySelector('.sudoku-study');sudokuUI.renderer=mountSudokuRenderer(root);
+      sudokuUI.tools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncSudoku(playback.steps[playback.index]),onShow:()=>syncSudoku(playback.steps[playback.index]),onLeaveEditor:()=>syncSudoku(playback.steps[playback.index])});
+      root.querySelector('.pf-dialog-heading p').textContent='The same puzzle. Different search decisions.';
+      if(compareOpen)sudokuUI.tools.show('pf-comparisons');
+      sudokuUI.dropdowns=mountStudySelects(root);
+      if(activeId)document.getElementById(activeId)?.focus({preventScroll:true});
+    }
+    syncSudoku(playback.steps[playback.index]);updateControls();
+  }finally{sudokuUI.rendering=false;}
+}
+function syncTimetable(frame) {
+  if(!timetableUI.renderer||!app.querySelector('.timetable-study'))return;
+  app.setAttribute('aria-busy',String(busy));
+  timetableUI.renderer.update({c:cfg(),frame,playback,busy,result});
+  const locked=busy||!!playback.steps.length;
+  app.querySelectorAll('.timetable-study .pf-setup select,.timetable-study [data-param],.timetable-study .pf-number-step').forEach(el=>el.disabled=locked);
+  app.querySelectorAll('.timetable-study [data-action="compare"],.timetable-study [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
+  app.querySelectorAll('.timetable-study #timetable-upload,.timetable-study #timetable-json,.timetable-study [data-action="apply-timetable"]').forEach(el=>el.disabled=busy);
+  timetableUI.dropdowns?.sync();
+  if(busy||playback.timer)timetableUI.tools?.back();
+}
+function renderTimetable() {
+  if(timetableUI.rendering)return;
+  timetableUI.rendering=true;
+  try {
+    const c=cfg(),key=JSON.stringify(c),extras=[comparison,visualCompare],activeId=document.activeElement?.id;
+    const html=()=>timetablePage({c,playback,selectField,icon,guide:guideHTML(),comparisons:visualComparisonHTML()+(comparison?comparisonHTML(comparison):''),comparisonControls:`<div class="visual-compare-controls"><label>Trace A<select id="visual-alg-a">${selectOptions(algorithms[lab],visualCompare?.left.algorithm||c.algorithm)}</select></label><label>Trace B<select id="visual-alg-b">${selectOptions(algorithms[lab].filter(a=>a!==(visualCompare?.left.algorithm||c.algorithm)),visualCompare?.right.algorithm||algorithms[lab].find(a=>a!==c.algorithm))}</select></label><button data-action="compare-visual">Compare visual traces</button></div>`});
+    if(timetableUI.renderer&&timetableUI.key===key&&app.querySelector('.timetable-study')){
+      if(!timetableUI.extras||extras.some((v,i)=>v!==timetableUI.extras[i])){
+        const t=document.createElement('template');t.innerHTML=html();
+        document.querySelector('#pf-comparisons .pf-tool-content').replaceWith(t.content.querySelector('#pf-comparisons .pf-tool-content'));
+        if(comparison||visualCompare)timetableUI.tools.show('pf-comparisons');
+        timetableUI.extras=extras;
+      }
+    }else{
+      const mode=timetableUI.tools?.mode||'',compareOpen=timetableUI.tools?.compareOpen;
+      timetableUI.tools?.destroy();timetableUI.dropdowns?.destroy();timetableUI.renderer?.destroy();
+      app.innerHTML=html();timetableUI.key=key;timetableUI.extras=extras;
+      const root=app.querySelector('.timetable-study');timetableUI.renderer=mountTimetableRenderer(root);
+      timetableUI.tools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncTimetable(playback.steps[playback.index]),onShow:()=>syncTimetable(playback.steps[playback.index]),onLeaveEditor:()=>syncTimetable(playback.steps[playback.index])});
+      root.querySelector('.pf-dialog-heading p').textContent='The same constraints. Different search decisions.';
+      if(compareOpen)timetableUI.tools.show('pf-comparisons');
+      timetableUI.dropdowns=mountStudySelects(root);
+      if(activeId)document.getElementById(activeId)?.focus({preventScroll:true});
+    }
+    syncTimetable(playback.steps[playback.index]);updateControls();
+  }finally{timetableUI.rendering=false;}
+}
 function renderLab() {
+  if(lab==='timetable'){renderTimetable();return;}
+  if(lab==='timetable'){
+    updateControls();const live=document.getElementById('playback-live');if(live&&!playback.timer&&frame)live.textContent=`${frame.event}: ${frame.reason}`;return;
+  }
+  if(lab==='sudoku'){renderSudoku();return;}
+  if (lab === 'game') { renderGameStudy(); return; }
+  if (lab === 'optimization') { renderNQueens(); return; }
+  if (lab === 'pathfinding') { renderPathfinding(); return; }
   const c = cfg(),
     frame = playback.steps[playback.index],
     algPair = algorithms[lab],
@@ -536,51 +866,20 @@ function preview(l) {
     )
     .join("")}</svg>`;
 }
+function jumpDashboard(section, animate = true) {
+  const target = app.querySelector(`[data-dashboard-section="${section}"]`) || document.getElementById(`sd-${section}`);
+  target?.scrollIntoView({ behavior: !animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+}
 function dashboard() {
-  const comparisons = data.history.filter(
-    (h) => h.type === "comparison" && h.lab === dashboardLab,
-  );
-  const chosen =
-    comparisons.find((h) => h.id === dashboardExperiment) || comparisons[0];
+  const previousScroll = window.scrollY;
+  const focusedId = document.activeElement?.id;
+  cleanupDashboard?.();
+  const comparisons = data.history.filter(h => h.type === "comparison" && h.lab === dashboardLab);
+  const chosen = comparisons.find(h => h.id === dashboardExperiment) || comparisons[0];
   dashboardExperiment = chosen?.id || null;
-  const labs = Object.keys(labNames),
-    featured = "pathfinding",
-    others = labs.filter((id) => id !== featured);
-  const summaries = {
-    optimization: "Move queens toward a board with zero conflicts.",
-    game: "Play Tic-Tac-Toe and inspect the opponent’s search.",
-    sudoku: "Watch assignments, domain reductions, and backtracking.",
-    timetable: "Schedule classes with availability and conflict constraints.",
-  };
-  const runCount = data.history.filter(
-    (h) => h.type !== "configuration",
-  ).length;
-  app.innerHTML = `
-    <section class="hero">
-      <div><h1>Follow every decision.</h1><p>Configure a problem, replay the search, and compare how algorithms work. Your experiments stay in this browser.</p></div>
-      <div class="heading-actions"><a class="button-link primary" href="#question-visualizer">${icon("path")}Visualize a question</a><a class="button-link" href="README.md" target="_blank" rel="noopener">${icon("book-open")}Project guide</a></div>
-    </section>
-    <div class="section-title"><h2>Choose a problem</h2><small>Five labs · shared playback controls</small></div>
-    <section class="lab-index" aria-label="Learning laboratories">
-      <a class="lab-feature" href="#${featured}">
-        <div class="lab-feature-copy"><h2>${labNames[featured]}</h2><p>Edit a map and follow the frontier. Compare the fewest moves with the lowest movement cost.</p>
-          <div class="method-list">${algorithms[featured].map((a) => `<span>${e(labels[a])}</span>`).join("")}</div>
-        </div>
-        <div class="lab-feature-map">${preview(featured)}</div>
-        <span class="lab-open">Open pathfinding${icon("arrow-up-right")}</span>
-      </a>
-      <div class="lab-list">${others
-        .map(
-          (l) => `
-        <a class="lab-row" href="#${l}">
-          <span class="lab-row-preview">${preview(l)}</span>
-          <span class="lab-row-copy"><span class="lab-row-title">${l === "optimization" ? "N-Queens" : labNames[l]}</span><span class="lab-row-description">${summaries[l]}</span><span class="lab-methods">${algorithms[l].map((a) => labels[a]).join(" · ")}</span></span>
-          <span class="lab-row-arrow">${icon("arrow-up-right")}</span>
-        </a>`,
-        )
-        .join("")}
-      </div>
-    </section>
+  const labs = Object.keys(labNames);
+  const runCount = data.history.filter(h => h.type !== "configuration").length;
+  const comparisonPanel = `
     <section class="dashboard-section">
       <div class="section-title"><div><h2 class="with-icon">${icon("chart-bar")}Compare results</h2><p class="section-intro">Same input. Different algorithms. Measured computation.</p></div>${runCount ? `<span class="section-count">${runCount} recorded runs</span>` : ""}</div>
       <div class="panel"><div class="panel-body">
@@ -598,6 +897,8 @@ function dashboard() {
         ${chosen ? `<div id="comparison-chart">${comparisonChart(chosen, metricKeys[dashboardLab][0])}</div>${comparisonHTML(chosen)}` : `<div class="empty-state">${icon("chart-bar")}<div><strong>No comparison recorded.</strong>Choose a lab and run its algorithms on the same input.</div></div>`}
       </div></div>
     </section>
+`;
+  const historyPanel = `
     <section class="dashboard-section">
       <div class="section-title"><div><h2 class="with-icon">${icon("clock-counter-clockwise")}Experiment history</h2><p class="section-intro">Revisit an input or export your results.</p></div><div class="heading-actions"><button data-action="import" class="small-button">${icon("upload-simple")}Import JSON</button><button data-action="export" class="small-button">${icon("download-simple")}Export JSON</button><button data-action="clear-history" class="small-button danger">${icon("trash")}Clear history</button>${historyUndo ? `<button data-action="undo-clear" class="small-button">${icon("arrow-counter-clockwise")}Undo clear</button>` : ""}</div></div>
       <div class="panel">${
@@ -610,9 +911,13 @@ function dashboard() {
       }
       </div>
     </section>
-    <footer class="app-footer"><span>Search & Optimization Playground</span><a href="docs/ALGORITHMS.md" target="_blank" rel="noopener">Algorithm reference${icon("arrow-up-right")}</a><span>Stored locally · computation runs in your browser</span></footer>
-  `;
+`;
+  app.innerHTML = dashboardHTML({ comparisonHTML: comparisonPanel, historyHTML: historyPanel });
+  cleanupDashboard = mountDashboardMotion(app.firstElementChild);
+  if (focusedId) document.getElementById(focusedId)?.focus({ preventScroll: true });
+  window.scrollTo(0, previousScroll);
 }
+
 const metricGuidance = {
   expanded:
     "Search effort for the same map and outcome; fewer expansions means less search work.",
@@ -639,6 +944,8 @@ const metricGuidance = {
     "Equal-score moves used to cross plateaus; this describes search behavior.",
   restarts:
     "Additional starting trajectories; interpret alongside the best conflict score.",
+  recoveryEvaluations:
+    "Candidate placements checked by the exact completion phase after local search stalls.",
   nodesEvaluated:
     "Game-tree states inspected. Fewer can mean less work when outcomes are equally proven.",
   terminalEvaluations:
@@ -676,21 +983,25 @@ function comparisonChart(entry, key) {
   return `<p class="metric-guidance">${metricDirection(key)}</p><svg class="comparison-chart" style="height:${height}px" viewBox="0 0 700 ${height}" role="img" aria-label="${metricLabels[key]} by algorithm. ${metricDirection(key)}">${rows.map((r, i) => `<text x="0" y="${i * 38 + 21}" fill="var(--color-ink-2)">${e(labels[r.algorithm])}</text><rect x="170" y="${i * 38 + 6}" width="${Number.isFinite(r.metrics[key]) ? Math.max(1, (r.metrics[key] / max) * 390) : 0}" height="22" rx="2" fill="var(--color-accent)"/><text x="${Number.isFinite(r.metrics[key]) ? 180 + (r.metrics[key] / max) * 390 : 180}" y="${i * 38 + 22}">${format(r.metrics[key], key)}</text>`).join("")}</svg>`;
 }
 function render() {
-  document.getElementById("breadcrumb").textContent =
-    lab === "dashboard" ? "Overview" : names[lab];
-  document.getElementById("navigation").innerHTML = Object.entries(names)
-    .map(
-      ([id, name]) =>
-        `<a href="#${id}" class="nav-link ${id === lab ? "active" : ""}" ${id === lab ? 'aria-current="page"' : ""}>${icon(labIcons[id], "nav-icon")}<span>${id === "optimization" ? "N-Queens" : id === "timetable" ? "Timetable" : id === "game" ? "Game AI" : name}</span></a>`,
-    )
-    .join("");
+  document.body.classList.toggle("is-dashboard", lab === "dashboard");
+  document.body.classList.toggle("is-pathfinding", lab === "pathfinding");
+  document.body.classList.toggle("is-optimization", lab === "optimization");
+  document.body.classList.toggle("is-sudoku",lab==="sudoku");
+  document.body.classList.toggle("is-timetable",lab==="timetable");
+  document.body.classList.toggle("is-game", lab === "game");
+  document.body.classList.toggle("is-question",lab==="question-visualizer");
+  document.body.classList.toggle("is-document", ["reference", "guide"].includes(lab));
+  siteNavigation.update(lab);
   if (lab === "dashboard") dashboard();
   else if (lab === "question-visualizer") {
     questionWorkspace = mountQuestionWorkspace(app, { notify });
+  } else if (["reference", "guide"].includes(lab)) {
+    cleanupDocument = mountDocumentPage(app, lab);
   } else renderLab();
 }
 function updateControls() {
-  if (lab === "dashboard") return;
+  if (navigating) return;
+  if (!Object.hasOwn(labNames, lab)) return;
   const get = (id) => document.getElementById(id),
     has = !!playback.steps.length;
   if (!get("run")) return;
@@ -720,6 +1031,20 @@ function updateControls() {
     ? `Event ${playback.steps[playback.index].eventIndex}`
     : "0";
   get("speed-label").textContent = `${playback.speed} steps/s`;
+  if (['pathfinding','optimization','sudoku','timetable'].includes(lab)) {
+    const playing = !!playback.timer;
+    get('run').querySelector('.button-text').textContent = busy ? 'Computing…' : playing ? 'Pause search' : has ? (playback.index === playback.steps.length - 1 ? 'Replay search' : 'Resume search') : 'Run search';
+    get('pause').hidden = !playing;
+    get('pf-play').hidden = playing;
+    get('pf-play').disabled = busy;
+    app.querySelector('.pf-page')?.style.setProperty('--pf-step-duration', `${playback.timer ? Math.min(110,Math.floor(400/playback.speed)) : 0}ms`);
+    get('pf-step-label').textContent = busy ? 'Computing search…' : has ? `Step ${playback.index + 1} of ${playback.steps.length}` : lab==='optimization'?'Choose a board and begin':lab==='sudoku'?'Choose a puzzle and begin':lab==='timetable'?'Choose a dataset and begin':'Choose a map and begin';
+    get('step-count').textContent = busy ? 'Computing…' : has ? `${playback.index + 1} / ${playback.steps.length}` : '0 / 0';
+    if(lab==='optimization')syncNQueens(playback.steps[playback.index]);
+  }
+  if (lab === 'game') syncGameStudy(playback.steps[playback.index]);
+  if (lab === 'sudoku') syncSudoku(playback.steps[playback.index]);
+  if (lab === 'timetable') {syncTimetable(playback.steps[playback.index]);get('run').querySelector('.button-text').textContent=busy?'Generating…':playback.timer?'Pause search':has?(playback.index===playback.steps.length-1?'Replay search':'Resume search'):'Generate timetable';}
   const marks = get("timeline-markers");
   if (marks && has) {
     const ids = new Set(playback.jumpPoints);
@@ -742,69 +1067,48 @@ function updateControls() {
   } else if (gap) gap.textContent = "";
 }
 function updateFrame(frame) {
-  if (lab === "dashboard" || !document.getElementById("visualization")) return;
-  const visualization = document.getElementById("visualization"),
-    focused = document.activeElement?.matches("[data-cell]")
-      ? document.activeElement.dataset.cell
-      : null,
-    treeFocus = document.activeElement?.closest("[data-tree]")?.dataset.tree,
-    html = visualHTML(frame);
-  if (
-    lab === "pathfinding" &&
-    !busy &&
-    visualization.querySelector(".grid-svg")
-  ) {
-    const holder = document.createElement("template");
-    holder.innerHTML = html;
-    const oldSvg = visualization.querySelector(".grid-svg"),
-      newSvg = holder.content.querySelector(".grid-svg");
-    if (newSvg) {
-      oldSvg.setAttribute("aria-label", newSvg.getAttribute("aria-label"));
-      oldSvg.setAttribute("style", newSvg.getAttribute("style") || "");
-      for (const fresh of newSvg.querySelectorAll(".cell")) {
-        const old = oldSvg.querySelector(`[data-cell="${fresh.dataset.cell}"]`);
-        if (!old) continue;
-        for (const a of [...old.attributes])
-          if (!fresh.hasAttribute(a.name)) old.removeAttribute(a.name);
-        for (const a of [...fresh.attributes])
-          old.setAttribute(a.name, a.value);
-        const oldRect = old.querySelector("rect"),
-          newRect = fresh.querySelector("rect");
-        for (const a of [...oldRect.attributes])
-          if (!newRect.hasAttribute(a.name)) oldRect.removeAttribute(a.name);
-        for (const a of [...newRect.attributes])
-          oldRect.setAttribute(a.name, a.value);
-        const oldText = old.querySelector("text"),
-          newText = fresh.querySelector("text");
-        oldText.textContent = newText.textContent;
-        for (const a of [...oldText.attributes])
-          if (!newText.hasAttribute(a.name)) oldText.removeAttribute(a.name);
-        for (const a of [...newText.attributes])
-          oldText.setAttribute(a.name, a.value);
-      }
-    }
-  } else visualization.innerHTML = html;
-  document.getElementById("explanation").innerHTML =
-    explanationHTML(lab, cfg(), frame, selected) +
-    lessonHTML(lab, result, frame);
-  document.getElementById("metrics").innerHTML = metricsHTML(
-    lab,
-    frame ? frame.metrics : {},
-  );
-  const live = document.getElementById("playback-live");
-  if (live && !playback.timer && frame)
-    live.textContent = `${frame.event || "Step"}: ${frame.reason || ""}`;
-  if (focused !== null)
-    document
-      .querySelector(`[data-cell="${focused}"]`)
-      ?.focus({ preventScroll: true });
-  if (treeFocus !== undefined)
-    document
-      .querySelector(`[data-tree="${treeFocus}"] summary`)
-      ?.focus({ preventScroll: true });
+  if (navigating) return;
+  if (!Object.hasOwn(labNames, lab) || (!document.getElementById("visualization") && lab !== 'game')) return;
+  if(lab==='timetable'){
+    updateControls();const live=document.getElementById('playback-live');if(live&&!playback.timer&&frame)live.textContent=`${frame.event}: ${frame.reason}`;return;
+  }
+  if(lab==='sudoku'){
+    updateControls();
+    const live=document.getElementById('playback-live');if(live&&!playback.timer&&frame)live.textContent=`${frame.event}: ${frame.reason}`;
+    return;
+  }
+  if(lab==='optimization'){
+    const live=document.getElementById('playback-live');if(live&&!playback.timer&&frame)live.textContent=`${frame.event}: ${frame.reason}`;
+    updateControls();return;
+  }
+  if (lab === 'pathfinding') {
+    syncPathfinding(frame);
+    if (document.getElementById('pf-details')?.hidden === false) document.getElementById('metrics').innerHTML = metricsHTML(lab,frame?.metrics || {});
+    if (document.getElementById('pf-algorithm')?.open) document.getElementById('pf-algorithm-content').innerHTML = explanationHTML(lab,cfg(),frame,selected)+lessonHTML(lab,result,frame);
+    const live=document.getElementById('playback-live');
+    if (live && !playback.timer && frame) live.textContent=`${frame.event}: ${frame.reason}`;
+    updateControls();return;
+  }
+  if (lab === 'game') {
+    const live=document.getElementById('playback-live');
+    const treeFocus=document.activeElement?.closest('[data-tree]')?.dataset.tree;
+    if(live&&!playback.timer&&frame)live.textContent=`${frame.event}: ${frame.reason}`;
+    syncGameStudy(frame);
+    if(treeFocus!==undefined)app.querySelector(`[data-tree="${treeFocus}"] summary`)?.focus({preventScroll:true});
+    updateControls();
+    return;
+  }
+  const visualization = document.getElementById('visualization');
+  const treeFocus = document.activeElement?.closest('[data-tree]')?.dataset.tree;
+  visualization.innerHTML = visualHTML(frame);
+  document.getElementById('explanation').innerHTML=explanationHTML(lab,cfg(),frame,selected)+lessonHTML(lab,result,frame);
+  document.getElementById('metrics').innerHTML=metricsHTML(lab,frame?.metrics || {});
+  const live=document.getElementById('playback-live');
+  if(live && !playback.timer && frame) live.textContent=`${frame.event}: ${frame.reason}`;
+  if(treeFocus!==undefined) document.querySelector(`[data-tree="${treeFocus}"] summary`)?.focus({preventScroll:true});
   updateControls();
 }
-function run(auto = true, type = "run") {
+function run(auto = true, type = "run", viewFinal = false) {
   if (busy) return;
   if (type === "run" && playback.steps.length) {
     auto ? playback.play() : playback.next();
@@ -825,7 +1129,7 @@ function run(auto = true, type = "run") {
     target = lab;
   renderLab();
   try {
-    worker = new Worker(new URL("./worker.js", import.meta.url), {
+    worker = new Worker(new URL("./worker.js?v=calendar-4", import.meta.url), {
       type: "module",
     });
   } catch (error) {
@@ -864,11 +1168,22 @@ function run(auto = true, type = "run") {
       result = message.result;
       openNodes = new Set([0]);
       remember(summary(target, input, result));
+      let gameMove=null;
+      if (target === 'game' && result.output.move != null) {
+        const game = configs.game.problem;
+        if (game.turn === game.ai && !game.board[result.output.move] && !winner(game.board)) {
+          gameMove=result.output.move;
+          game.board[result.output.move] = game.ai;
+          game.turn = game.ai === 'X' ? 'O' : 'X';
+          configs.game.position = 'custom';
+          persist();
+        }
+      }
       playback.load(result.steps);
+      if ((target === 'game'||viewFinal) && playback.steps.length) playback.index = playback.steps.length - 1;
       renderLab();
-      if (auto) playback.play();
-      else if (target === "game")
-        notify("AI decision ready. Replay the search or play the chosen move.");
+      if(target==='game'&&gameMove!==null)animateGameMove(gameMove);
+      if (auto && target !== 'game' && !viewFinal) playback.play();
     }
   };
   worker.onerror = (error) => {
@@ -891,7 +1206,7 @@ function compareVisual() {
   const id = ++requestId,
     target = lab,
     input = clone(cfg());
-  compareWorker = new Worker(new URL("./worker.js", import.meta.url), {
+  compareWorker = new Worker(new URL("./worker.js?v=calendar-4", import.meta.url), {
     type: "module",
   });
   compareWorker.onmessage = ({ data: message }) => {
@@ -965,8 +1280,9 @@ function updateSetting(key, value) {
     weight = +value;
   } else if (key === "size") {
     const n = +value;
-    if (!Number.isInteger(n) || n < 5 || n > 40) {
-      notify("Board size must be from 5 to 40.");
+    if (!Number.isInteger(n) || n < 4 || n > 12) {
+      document.getElementById('size').value=c.problem.queens.length;
+      notify("Board size must be from 4 to 12.");
       return;
     }
     c.problem.queens = queensPreset(n, c.seed);
@@ -1063,6 +1379,7 @@ function updateSetting(key, value) {
   visualCompare = null;
   persist();
   renderLab();
+  if (lab === 'game' && c.problem.turn === c.problem.ai && !winner(c.problem.board)) run(true);
 }
 function paint(id) {
   const p = cfg().problem;
@@ -1082,28 +1399,12 @@ function paint(id) {
     return false;
   } else p.cells[id] = brush === "wall" ? 0 : brush === "weight" ? weight : 1;
   cfg().preset = "custom";
-  if (!paintStroke) persist();
+  persist();
   document.getElementById("preset").value = "custom";
   selected = id;
   comparison = null;
-  paintChanged = true;
-  if (paintStroke) {
-    const svg = document.createElement("template");
-    svg.innerHTML = pathSVG(p, {}, selected);
-    const freshCell = svg.content.querySelector(`[data-cell="${id}"]`),
-      oldCell = document.querySelector(`[data-cell="${id}"]`);
-    if (freshCell && oldCell) oldCell.replaceWith(freshCell);
-  } else updateFrame(null);
+  updateFrame(null);
   return true;
-}
-function finishPaint() {
-  if (paintChanged) {
-    persist();
-    paintChanged = false;
-    updateFrame(playback.steps[playback.index] || null);
-  }
-  paintStroke = false;
-  app.classList.remove("is-painting");
 }
 function applyBasicTimetable() {
   const c = cfg(),
@@ -1158,6 +1459,18 @@ function applyBasicTimetable() {
     notify(err.message);
   }
 }
+function downloadJSONFile(value,name){
+  const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function applyTimetableJSON(text,generate){
+  const problem=parseTimetableJSON(text);
+  const next=validateConfiguration('timetable',{...configs.timetable,problem,dataset:'custom'});
+  timetableUploadId++;
+  cancel();result=null;comparison=null;visualCompare=null;playback.reset();configs.timetable=next;persist();renderLab();
+  document.getElementById('tt-upload-message').textContent=`Loaded ${problem.sessions.length} sessions, ${problem.slots.length} slots, and ${problem.rooms.length} rooms.`;
+  if(generate){timetableUI.tools.back();run(false,'run',true);}
+}
 function download() {
   const blob = new Blob(
       [
@@ -1176,38 +1489,32 @@ function download() {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-app.addEventListener("pointerdown", (event) => {
-  if (lab === "question-visualizer") return;
-  const cell = event.target.closest("[data-cell]");
-  if (
-    !cell ||
-    lab !== "pathfinding" ||
-    brush === "inspect" ||
-    event.button !== 0
-  )
-    return;
-  skipCellClick = true;
-  paintStroke = true;
-  paintChanged = false;
-  app.classList.add("is-painting");
-  paint(+cell.dataset.cell);
-});
-app.addEventListener("pointerover", (event) => {
-  if (lab === "question-visualizer") return;
-  if (!paintStroke) return;
-  const cell = event.target.closest("[data-cell]");
-  if (cell && lab === "pathfinding") paint(+cell.dataset.cell);
-});
-window.addEventListener("pointerup", finishPaint);
-window.addEventListener("pointercancel", finishPaint);
 app.addEventListener("click", (event) => {
+  const sectionLink = event.target.closest('a[href^="#sd-"]');
+  if (lab === "dashboard" && sectionLink && !sectionLink.hasAttribute("data-dashboard-jump")) {
+    event.preventDefault();
+    document.getElementById(sectionLink.getAttribute("href").slice(1))?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    return;
+  }
+  const dashboardJump = event.target.closest("[data-dashboard-jump]");
+  if (dashboardJump) {
+    event.preventDefault();
+    jumpDashboard(dashboardJump.dataset.dashboardJump);
+    return;
+  }
   if (lab === "question-visualizer") return;
+  const numberStep = event.target.closest("[data-number-step]");
+  if (numberStep && ['pathfinding','optimization','sudoku','timetable'].includes(lab)) {
+    const input = numberStep.parentElement.querySelector('input[type="number"]');
+    if (!input || numberStep.disabled) return;
+    const min = Number(input.min || 0), max = Number(input.max || Number.MAX_SAFE_INTEGER);
+    const step = Number(input.step || 1) * Number(numberStep.dataset.numberStep);
+    input.value = String(Number(Math.min(max, Math.max(min, Number(input.value || min) + step)).toFixed(6)));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
   const cell = event.target.closest("[data-cell]");
   if (cell && lab === "pathfinding") {
-    if (skipCellClick) {
-      skipCellClick = false;
-      return;
-    }
     paint(+cell.dataset.cell);
     return;
   }
@@ -1238,7 +1545,21 @@ app.addEventListener("click", (event) => {
       c.position = "custom";
       persist();
       renderLab();
-      if (!winner(c.problem.board)) run(false);
+      animateGameMove(i);
+      if (!winner(c.problem.board)) {
+        busy=true;
+        renderLab();
+        gameDelayTimer=setTimeout(()=>{
+          gameDelayTimer=null;
+          if(lab!=='game'||c.problem.turn!==c.problem.ai||winner(c.problem.board)){
+            busy=false;
+            renderLab();
+            return;
+          }
+          busy=false;
+          run(true);
+        },360);
+      }
     }
     return;
   }
@@ -1248,13 +1569,17 @@ app.addEventListener("click", (event) => {
     if (h) {
       configs[h.lab] = clone(h.config);
       persist();
-      location.hash = h.lab;
+      if (lab === h.lab) navigate();
+      else location.hash = h.lab;
     }
     return;
   }
   const action = event.target.closest("[data-action]")?.dataset.action;
   if (!action) return;
-  if (action === "run") run();
+  if (action === "run") {
+    if (['pathfinding','optimization','sudoku','timetable'].includes(lab) && playback.timer) playback.pause();
+    else run();
+  }
   if (action === "pause") {
     playback.pause();
     document.getElementById("playback-live").textContent = "Playback paused.";
@@ -1307,6 +1632,7 @@ app.addEventListener("click", (event) => {
   }
   if (action === "import") document.getElementById("import-config")?.click();
   if (action === "apply-queens") {
+    if(busy||playback.steps.length)return;
     const values = document
         .getElementById("queen-rows")
         .value.split(/[\s,]+/)
@@ -1326,23 +1652,19 @@ app.addEventListener("click", (event) => {
     renderLab();
   }
   if (action === "clear-sudoku") {
+    if(busy||playback.steps.length)return;
     cfg().problem.board.fill(0);
     cfg().puzzle = "custom";
     persist();
     renderLab();
   }
-  if (action === "apply-timetable") {
-    try {
-      const p = JSON.parse(document.getElementById("timetable-json").value);
-      timetableModel(p);
-      cfg().problem = p;
-      cfg().dataset = "custom";
-      persist();
-      renderLab();
-      notify("Timetable dataset applied.");
-    } catch (error) {
-      notify(error.message);
-    }
+  if(action==='apply-timetable'&&lab==='timetable'&&!busy){
+    try{applyTimetableJSON(document.getElementById('timetable-json').value,false);}catch(error){document.getElementById('tt-upload-message').textContent=error.message;}
+  }
+  if(action==='tt-template')downloadJSONFile(timetablePreset(),'algoai-timetable-example.json');
+  if(action==='tt-export'&&lab==='timetable'&&result?.status==='solved'){
+    const p=cfg().problem;
+    downloadJSONFile({dataset:p,schedule:result.output.assignments.map((placement,i)=>({...p.sessions[i],slot:placement.slot,time:p.slots[placement.slot],room:placement.room}))},'algoai-timetable.json');
   }
   if (action === "apply-timetable-basic") applyBasicTimetable();
   if (action === "new-game") {
@@ -1352,28 +1674,7 @@ app.addEventListener("click", (event) => {
     cfg().position = "empty";
     persist();
     renderLab();
-  }
-  if (action === "apply-ai") {
-    const c = cfg(),
-      move = result?.output.move;
-    if (
-      move !== null &&
-      move !== undefined &&
-      c.problem.turn === c.problem.ai &&
-      !c.problem.board[move] &&
-      !winner(c.problem.board)
-    ) {
-      cancel();
-      c.problem.board[move] = c.problem.ai;
-      c.position = "custom";
-      c.problem.turn = c.problem.ai === "X" ? "O" : "X";
-      result = null;
-      comparison = null;
-      visualCompare = null;
-      playback.reset();
-      persist();
-      renderLab();
-    }
+    if(cfg().problem.turn===cfg().problem.ai)run(true);
   }
   if (action === "focus-branch") {
     let id = playback.steps[playback.index]?.state.nodeId;
@@ -1407,8 +1708,24 @@ app.addEventListener("click", (event) => {
   }
 });
 document.addEventListener("change", async (event) => {
+  // Removing a focused configuration field can emit a second native change.
+  // Its value was already committed; do not reenter the DOM mount on blur.
+  if (lab === 'pathfinding' && pfRendering) return;
+  if (lab === 'optimization' && nqRendering) return;
+  if (lab === 'game' && gameRendering) return;
+  if (lab === 'sudoku' && sudokuUI.rendering) return;
+  if (lab === 'timetable' && timetableUI.rendering) return;
   const el = event.target;
   if (lab === "question-visualizer" && el.closest(".qv-workspace")) return;
+  if(el.id==='timetable-upload'&&lab==='timetable'){
+    const file=el.files?.[0],ticket=++timetableUploadId,revision=requestId;if(!file||busy)return;
+    try{
+      if(file.size>262144)throw Error('Choose a JSON file smaller than 256 KB.');
+      const text=await file.text();if(ticket!==timetableUploadId||revision!==requestId||lab!=='timetable')return;
+      applyTimetableJSON(text,true);
+    }catch(error){if(ticket===timetableUploadId&&lab==='timetable')document.getElementById('tt-upload-message').textContent=error.message;}
+    if(el.isConnected)el.value='';return;
+  }
   if (el.id === "import-config" && el.files?.[0]) {
     try {
       const incoming = await el.files[0].text(),
@@ -1434,6 +1751,7 @@ document.addEventListener("change", async (event) => {
     updateSetting("algorithm", el.checked ? "alphabeta" : "minimax");
   if (el.dataset.param) updateSetting(el.dataset.param, el.value);
   if (el.dataset.sudoku !== undefined) {
+    if(busy||playback.steps.length||sudokuUI.tools?.mode!=="pf-editor")return;
     const text = el.value.trim();
     if (!/^[0-9]?$/.test(text)) {
       el.value = "";
@@ -1444,6 +1762,7 @@ document.addEventListener("change", async (event) => {
     cfg().puzzle = "custom";
     document.getElementById("puzzle").value = "custom";
     persist();
+    sudokuUI.key=JSON.stringify(cfg());syncSudoku(null);
   }
   if (
     el.id === "visual-alg-a" &&
@@ -1495,6 +1814,7 @@ app.addEventListener("input", (event) => {
 });
 app.addEventListener("keydown", (event) => {
   if (lab === "question-visualizer") return;
+  if (!Object.hasOwn(labNames, lab)) return;
   if (event.target.matches("[data-cell]")) {
     const id = +event.target.dataset.cell,
       p = cfg().problem,
@@ -1566,12 +1886,16 @@ app.addEventListener(
   },
   true,
 );
-document.querySelector(".storage-note").innerHTML =
-  icon("bookmark-simple") + "Saved in this browser";
-document.getElementById("project-docs").innerHTML =
-  `Project documentation${icon("arrow-up-right")}`;
 window.addEventListener("hashchange", navigate);
 window.addEventListener("beforeunload", () => {
+  cleanupDocument?.();
+  timetableUI.tools?.destroy();timetableUI.dropdowns?.destroy();timetableUI.renderer?.destroy();
+  sudokuUI.tools?.destroy();sudokuUI.dropdowns?.destroy();sudokuUI.renderer?.destroy();
+  nqTools?.destroy();nqDropdowns?.destroy();nqRenderer?.destroy();
+  pfTools?.destroy();
+  pfDropdowns?.destroy();
+  cleanupDashboard?.();
+  siteNavigation.destroy();
   questionWorkspace?.destroy();
   worker?.terminate();
   playback.pause();

@@ -7,6 +7,8 @@ export class Playback {
     this.speed = 5;
     this.timer = null;
     this.jumpPoints = [];
+    this.useAnimationFrame = false;
+    this.frameHandle = null;
   }
 
   load(steps) {
@@ -34,7 +36,26 @@ export class Playback {
     if (!this.steps.length) return;
     if (this.index === this.steps.length - 1) this.index = 0;
     this.pause();
-    this.onStatus(true);
+    if (this.useAnimationFrame) {
+      // Advance one recorded event per deadline, never skip events to catch up.
+      // All three views are committed in show() before the browser paints.
+      this.timer = -1;
+      let nextAt = performance.now() + 1000 / this.speed;
+      const tick = now => {
+        if (!this.timer) return;
+        if (now >= nextAt) {
+          if (this.index < this.steps.length - 1) this.index++;
+          this.show();
+          if (this.index === this.steps.length - 1) { this.pause(); return; }
+          nextAt = now + 1000 / this.speed;
+        }
+        this.frameHandle = requestAnimationFrame(tick);
+      };
+      this.frameHandle = requestAnimationFrame(tick);
+      this.onStatus(true);
+      this.show();
+      return;
+    }
     this.timer = setInterval(() => {
       if (this.index >= this.steps.length - 1) {
         this.pause();
@@ -44,11 +65,14 @@ export class Playback {
       this.show();
       if (this.index === this.steps.length - 1) this.pause();
     }, 1000 / this.speed);
+    this.onStatus(true);
     this.show();
   }
 
   pause() {
-    clearInterval(this.timer);
+    if (this.frameHandle !== null) cancelAnimationFrame(this.frameHandle);
+    this.frameHandle = null;
+    if (this.timer !== -1) clearInterval(this.timer);
     this.timer = null;
     this.onStatus(false);
   }

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">AlgoAI</title>
+  <rect width="128" height="128" rx="28" fill="#101010" />
+  <text x="64" y="70" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="600" letter-spacing="-1.2" text-anchor="middle" dominant-baseline="middle">AlgoAI</text>
+</svg>
