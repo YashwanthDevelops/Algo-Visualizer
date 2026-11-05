@@ -4,6 +4,8 @@ A complete educational project using HTML5, CSS3, vanilla JavaScript, SVG, Web W
 
 **Live app:** [YashwanthDevelops.github.io/Algo-Visualizer](https://yashwanthdevelops.github.io/Algo-Visualizer/)
 
+**Project presentation:** [Open the 10-slide presentation](https://yashwanthdevelops.github.io/Algo-Visualizer/presentation/). Use the arrow keys or Space to advance, **F** for fullscreen, and **N** for speaker notes.
+
 The interface uses a charcoal foundation, restrained copper accents, and self-hosted IBM Plex Sans and IBM Plex Mono fonts. Font files and the SIL Open Font License are included in `assets/fonts`; the page makes no external font requests. See [the design notes](docs/DESIGN.md) for the palette, type scale, and visualization conventions.
 
 Navigation, playback, and experiment actions use Phosphor Regular icons retrieved with the `better-icons` skill. The SVG sprite and MIT license are included in `assets/icons`; icons load locally, inherit the interface colors, and accompany visible text labels.
