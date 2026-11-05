@@ -32,12 +32,14 @@ try {
   const go = async route => { await page.goto(`${base}#${route}`); await ready(route); };
   const click = async (route, mobile = false) => {
     if (mobile) {
-      await page.locator('.sd-mobile-toggle').click();
       if (labs.includes(route)) {
-        await page.locator('[data-mobile-menu="Labs"]').click();
+        await page.locator('.sd-dock-labs').click();
         await page.locator(`.sd-mobile-sub-links a[href="#${route}"]`).click();
+      } else if (['dashboard', 'question-visualizer'].includes(route)) {
+        await page.locator(`.sd-mobile-dock a[href="#${route}"]`).click();
       } else {
-        await page.locator(route === 'question-visualizer' ? '.sd-mobile-cta' : `.sd-mobile-main a[href="#${route}"]`).click();
+        await page.locator('.sd-dock-more').click();
+        await page.locator(`.sd-mobile-main a[href="#${route}"]`).click();
       }
     } else if (labs.includes(route)) {
       await page.locator('.sd-menu-trigger').first().click();
@@ -68,7 +70,7 @@ try {
     await page.locator(`.sd-menu a[href="#dashboard?section=${section}"][aria-current="page"]`).waitFor({state:'attached'});
     assert.deepEqual(await page.locator('.sd-menu a[aria-current="page"]').evaluateAll(links => links.map(link => link.getAttribute('href'))), [`#dashboard?section=${section}`]);
     await page.reload();
-    await page.waitForFunction(section => Math.abs(document.querySelector(`[data-dashboard-section="${section}"]`).getBoundingClientRect().top) < 100, section);
+    await page.waitForFunction(section => Math.abs(document.querySelector(`[data-dashboard-section="${section}"]`).getBoundingClientRect().top - document.querySelector('.sd-nav').getBoundingClientRect().bottom) < 3, section);
   }
 
   await go('question-visualizer');

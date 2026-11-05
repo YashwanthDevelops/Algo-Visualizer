@@ -29,7 +29,7 @@ The solver assigns every session one time slot and one allowed room. It respects
 
 A complete timetable satisfies all these constraints. The solver returns the first feasible solution; it does not optimize gaps or preferences. Session durations, room capacities, and preference scores are not part of this format. Unsupported fields are rejected rather than silently ignored.
 
-An exhaustive failed search reports that no feasible timetable exists. A search limit reports that feasibility is still unknown. Limits and variable/value ordering can be changed under Advanced settings after resetting playback.
+An exhaustive failed search reports that no feasible timetable exists. A search limit reports that feasibility is still unknown. Limits and variable/value ordering can be changed under Advanced settings at any time; changes clear the previous playback automatically.
 
 Download timetable exports the original dataset and the complete final schedule, even when playback is inspecting an earlier step. The result export is an output report; the upload expects the raw dataset object shown above.
 

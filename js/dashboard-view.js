@@ -42,14 +42,14 @@ export function dashboardHTML({ comparisonHTML = "", historyHTML = "" } = {}) {
 
     <section class="sd-workbench" aria-labelledby="sd-workbench-title">
       <div class="sd-workbench-stage" id="sd-compare" data-dashboard-section="compare"><div class="sd-workbench-inner">
-        <div class="sd-stage-copy"><h2 id="sd-workbench-title">Compare<br />what you find.</h2><p>Same problem, different approaches. See how each algorithm performs, and discover what the results can tell you.</p><a class="sd-text-link" href="#sd-templates">Explore the labs <span aria-hidden="true">↗</span></a></div>
+        <div class="sd-stage-copy"><h2 id="sd-workbench-title">Compare<br />what you find.</h2><p>Same problem, different approaches. See how each algorithm performs, and discover what the results can tell you.</p><a class="sd-text-link" href="#sd-templates">Explore the labs </a></div>
         <div class="sd-workbench-window sd-comparison-window">
           <div class="sd-window-bar"><span class="sd-window-lights"><i></i><i></i><i></i></span><span>COMPARE / EXPERIMENTS</span><span class="sd-window-count">01</span></div>
           <div class="sd-embedded-content">${comparisonHTML}</div>
         </div>
       </div></div>
       <div class="sd-workbench-stage sd-history-stage" id="sd-history" data-dashboard-section="history"><div class="sd-workbench-inner">
-        <div class="sd-stage-copy"><h2>Keep the<br />whole story.</h2><p>Each run is a chance to learn. Revisit an experiment, load its input, and keep building on what you discovered.</p><a class="sd-text-link" href="#sd-templates">Find a new question <span aria-hidden="true">↗</span></a></div>
+        <div class="sd-stage-copy"><h2>Keep the<br />whole story.</h2><p>Each run is a chance to learn. Revisit an experiment, load its input, and keep building on what you discovered.</p><a class="sd-text-link" href="#sd-templates">Find a new question </a></div>
         <div class="sd-workbench-window sd-history-window">
           <div class="sd-window-bar"><span class="sd-window-lights"><i></i><i></i><i></i></span><span>HISTORY / YOUR WORK</span><span class="sd-window-count">02</span></div>
           <div class="sd-embedded-content">${historyHTML}</div>
@@ -66,11 +66,11 @@ export function dashboardHTML({ comparisonHTML = "", historyHTML = "" } = {}) {
     <section class="sd-mountain-cta" aria-labelledby="sd-mountain-title">
       <img class="sd-mountain-image" src="assets/skydive/mountains.webp" alt="" loading="lazy" />
       <div class="sd-mountain-shade"></div>
-      <div class="sd-mountain-content"><h2 id="sd-mountain-title">Let’s explore</h2><a class="sd-button sd-button-light" href="#question-visualizer">Start learning <span aria-hidden="true">↗</span></a></div>
+      <div class="sd-mountain-content"><h2 id="sd-mountain-title">Let’s explore</h2><a class="sd-button sd-button-light" href="#question-visualizer">Start learning </a></div>
       <div class="sd-mountain-caption"><span>Foundations of Artificial Intelligence</span><span>Start anywhere. See where it takes you.</span></div>
     </section>
 
-    <footer class="sd-footer"><div class="sd-footer-columns"><div><a class="sd-footer-home" href="#dashboard">AlgoAI</a><p>Foundations of Artificial Intelligence.<br>Learn through exploration.</p></div><div><h3>LABORATORIES</h3><a href="#pathfinding">Pathfinding</a><a href="#optimization">N-Queens</a><a href="#game">Game AI</a><a href="#sudoku">Sudoku</a><a href="#timetable">Timetabling</a></div><div><h3>EXPLORE</h3><a href="#question-visualizer">Question Visualizer</a><a href="#dashboard?section=compare">Comparisons</a><a href="#dashboard?section=history">Experiment history</a></div><div><h3>REFERENCE</h3><a href="#reference">Algorithms</a><a href="#guide">Project guide</a><a href="#guide?doc=architecture">Architecture</a></div></div><a class="sd-footer-brand" href="#dashboard">AlgoAI</a><div class="sd-footer-bottom"><span>AlgoAI</span><span>Experiments saved in this browser</span><a href="#sd-hero-title">Back to top ↑</a></div></footer>
+    <footer class="sd-footer"><div class="sd-footer-columns"><div><a class="sd-footer-home" href="#dashboard">AlgoAI</a><p>Foundations of Artificial Intelligence.<br>Learn through exploration.</p></div><div><h3>LABORATORIES</h3><a href="#pathfinding">Pathfinding</a><a href="#optimization">N-Queens</a><a href="#game">Game AI</a><a href="#sudoku">Sudoku</a><a href="#timetable">Timetabling</a></div><div><h3>EXPLORE</h3><a href="#question-visualizer">Question Visualizer</a><a href="#dashboard?section=compare">Comparisons</a><a href="#dashboard?section=history">Experiment history</a></div><div><h3>REFERENCE</h3><a href="#reference">Algorithms</a><a href="#guide">Project guide</a><a href="#guide?doc=architecture">Architecture</a></div></div><a class="sd-footer-brand" href="#dashboard">AlgoAI</a><div class="sd-footer-bottom"><span>AlgoAI</span><span>Experiments saved in this browser</span><a href="#sd-hero-title">Back to top</a></div></footer>
   </div>`;
 }
 

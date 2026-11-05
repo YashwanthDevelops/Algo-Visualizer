@@ -7,7 +7,7 @@ export function mountPathfindingTools(root, {pause, onInspect, onLeaveEditor, on
   const study = document.createElement('div');study.className='pf-study-view';
   study.append(...notebook.childNodes);notebook.append(study);
   const tools=document.createElement('div');tools.className='pf-side-tools';tools.hidden=true;
-  tools.innerHTML='<div class="pf-side-heading"><button type="button" class="pf-back"><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M9.75 3.5 5.25 8l4.5 4.5M5.5 8h8"/></svg><span>Back to explanation</span></button><h2 id="pf-tool-title"></h2></div>';
+  tools.innerHTML='<div class="pf-side-heading"><button type="button" class="pf-back"><span>Back to explanation</span></button><h2 id="pf-tool-title"></h2></div>';
   notebook.append(tools);
   const title=tools.querySelector('h2'), triggers=new Map(), panels=new Map();
   const dialog=document.createElement('dialog');dialog.className='pf-comparison-dialog';dialog.setAttribute('aria-labelledby','pf-comparison-title');

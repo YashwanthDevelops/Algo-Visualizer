@@ -35,11 +35,11 @@
 .sd-intro-copy p span{transition:opacity .18s linear}
 .sd-workbench{padding:0 max(24px,calc((100% - 1200px)/2))}
 .sd-workbench-stage{height:160svh;position:relative;scroll-margin-top:var(--site-nav-height)}
-.sd-workbench-inner{position:sticky;top:var(--site-nav-height);min-height:calc(100svh - var(--site-nav-height));display:grid;grid-template-columns:380px minmax(0,520px);justify-content:space-between;gap:40px;align-items:center;padding:50px 0}
-.sd-stage-copy h2{font-size:32px;line-height:38px;letter-spacing:-.02em}
-.sd-stage-copy>p{font-size:16px;line-height:25px;color:#acacac;margin-top:14px;max-width:360px}
+.sd-workbench-inner{position:sticky;top:var(--site-nav-height);min-height:calc(100svh - var(--site-nav-height));display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);justify-content:space-between;gap:72px;align-items:center;padding:50px 0}
+.sd-stage-copy h2{font-size:clamp(40px,4.2vw,58px);line-height:1.04;letter-spacing:-.035em}
+.sd-stage-copy>p{font-size:18px;line-height:29px;color:#b8b8b8;margin-top:22px;max-width:410px}
 .sd-text-link{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:9px 16px;border-radius:999px;border:1px solid #3d3d3d;background:#242424;font:600 12px/16px "SD Inter",sans-serif;letter-spacing:.06em;text-transform:uppercase;transition:transform .15s,border-color .15s}
-.sd-text-link:hover{transform:translateY(-1px);border-color:#5a5a5a}
+.sd-text-link:hover{border-color:#777;background:#303030}
 .sd-workbench-window{background:#202020;border:1px solid #2e2e2e;border-radius:18px;width:100%;box-shadow:0 25px 55px -23px #0007;overflow:hidden}
 .sd-window-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #2e2e2e;font:500 10px/16px "SD Inter",sans-serif;color:#acacac;gap:12px}
 .sd-window-lights{display:flex;gap:5px}.sd-window-lights i{width:6px;height:6px;background:#5a5a5a;border-radius:50%}.sd-window-count{color:#8f8f8f}
@@ -95,3 +95,43 @@
 @media(max-width:600px){.sd-hero h1{font-size:28px}.sd-hero-description{max-width:190px!important}.sd-hero .sd-eyebrow{position:absolute;top:calc(100% + 64px);width:100%;margin:0}.sd-hero-copy{width:72vw}}
 
 @media(max-width:600px){.sd-hero-description{position:absolute;top:calc(100% + 88px);width:100%;max-width:none!important;margin:0!important;font-size:11px;line-height:18px}.sd-hero .sd-button{margin-top:28px}.sd-hero .sd-eyebrow{top:calc(100% + 56px)}}
+
+/* Comparison and history use a neutral palette, including their live charts. */
+.sd-workbench{--color-accent:#e5e5e5;--color-accent-ink:#111;--color-accent-soft:#2b2b2b;--color-focus:#f5f5f5;--color-success:#e5e5e5;--color-ink:#f5f5f5;--color-ink-2:#b8b8b8;--color-ink-3:#909090;--color-rule:#3b3b3b;--color-rule-soft:#303030;--color-paper:#171717;--color-paper-2:#202020;--color-control-rule:#505050;--accent:#e5e5e5;--good:#e5e5e5}
+.sd-workbench-window{background:#191919;border-color:#3b3b3b;box-shadow:0 16px 42px #0003}
+.sd-window-bar{background:#202020;border-color:#363636;padding:16px 24px;letter-spacing:.06em}
+.sd-workbench .sd-embedded-content{padding:26px;max-height:min(620px,74svh)}
+.sd-workbench .section-title h2{font-size:22px;line-height:28px}
+.sd-workbench .section-title h2>.icon{color:#d8d8d8;width:21px;height:21px}
+.sd-workbench .comparison-controls{padding:16px;background:#222;border:1px solid #373737;border-radius:10px;margin-bottom:24px}
+.sd-workbench .comparison-controls label{font-size:11px;letter-spacing:.02em;color:#bbb}
+.sd-workbench .comparison-controls .select-control{margin-top:7px}
+.sd-workbench .comparison-controls button{min-height:40px}
+.sd-workbench .sd-embedded-content select{background:#181818;border-color:#505050;border-radius:7px}
+.sd-workbench .sd-embedded-content button{background:#242424;border-color:#464646;transform:none}
+.sd-workbench .sd-embedded-content button.primary{background:#f5f5f5;border-color:#f5f5f5;color:#111}
+.sd-workbench .sd-embedded-content button:active{transform:none}
+.sd-workbench .section-count{font-size:11px;color:#c0c0c0}
+.sd-comparison-guide h3,.sd-history-guide h3{font-size:19px;line-height:25px;letter-spacing:-.015em;margin:0 0 8px}
+.sd-comparison-guide>p,.sd-history-guide>p{font-size:13px;line-height:21px;color:#aaa;margin:0}
+.sd-comparison-guide dl{margin:20px 0}
+.sd-comparison-guide dl>div{display:grid;grid-template-columns:128px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid #343434}
+.sd-comparison-guide dt{font-size:12px;font-weight:500;color:#e2e2e2}
+.sd-comparison-guide dd{margin:0;font-size:12px;line-height:19px;color:#aaa}
+.sd-panel-note{display:block;padding-top:14px;border-top:1px solid #343434;font-size:11px;line-height:18px;color:#909090}
+.sd-history-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:20px 0;margin-bottom:24px;border-top:1px solid #383838;border-bottom:1px solid #383838}
+.sd-history-overview>div{display:flex;flex-direction:column;gap:6px}
+.sd-history-overview strong{font:500 30px/1 "SD Aeonik",sans-serif;color:#f5f5f5;font-variant-numeric:tabular-nums}
+.sd-history-overview span{font-size:11px;line-height:16px;color:#aaa}
+.sd-history-guide ul{list-style:none;margin:20px 0 0;padding:0}
+.sd-history-guide li{padding:13px 0;border-top:1px solid #343434;display:flex;flex-direction:column;gap:5px}
+.sd-history-guide li strong{font-size:12px;font-weight:500;color:#ddd}
+.sd-history-guide li span{font-size:12px;line-height:19px;color:#aaa}
+.sd-history-guide .sd-text-link{margin-top:18px;font-size:10px}
+.sd-workbench .history-table th{font-size:10px;letter-spacing:.04em;color:#999;background:#222}
+.sd-workbench .history-table td{font-size:11px;vertical-align:middle}
+.sd-workbench .history-table tr:hover td{background:#222}
+.sd-workbench .comparison-chart{color:#ddd}
+@media(min-width:901px) and (max-width:1240px){.sd-workbench-inner{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:40px}}
+@media(max-width:900px){.sd-stage-copy h2{font-size:46px;line-height:1.06}.sd-stage-copy>p{font-size:17px;line-height:27px}.sd-workbench-window{max-width:650px}}
+@media(max-width:600px){.sd-stage-copy h2{font-size:38px;line-height:1.06}.sd-stage-copy>p{font-size:16px;line-height:25px;margin-top:16px}.sd-workbench .sd-embedded-content{padding:20px;max-height:58svh}.sd-comparison-guide dl>div{grid-template-columns:1fr;gap:5px;padding:12px 0}.sd-workbench .comparison-controls{padding:12px}.sd-history-overview{gap:10px}.sd-history-overview strong{font-size:26px}}

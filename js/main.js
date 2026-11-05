@@ -155,6 +155,21 @@ function cancel() {
   busy = false;
   playback.pause();
 }
+// Invalidate execution without remounting a focused editor or publishing stale
+// playback callbacks. Configuration changes commit and render immediately after.
+function discardExecution() {
+  const previous = navigating;
+  navigating = true;
+  try {
+    cancel();
+    result = null;
+    comparison = null;
+    visualCompare = null;
+    selected = null;
+    playback.reset();
+    app.setAttribute('aria-busy', 'false');
+  } finally { navigating = previous; }
+}
 function reset() {
   cancel();
   result = null;
@@ -466,10 +481,10 @@ function settingsHTML() {
         c.dataset || "custom",
       ) +
       `<details class="basic-timetable"><summary>Build a timetable</summary>${field("Time slots (comma separated)", "tt-slots", (c.problem.slots || []).join(", "), "text")}${field("Rooms (comma separated)", "tt-rooms", (c.problem.rooms || []).map((r) => r.id).join(", "), "text")}${field("Teachers (comma separated)", "tt-teachers", [...new Set((c.problem.sessions || []).map((s) => s.teacher))].join(", "), "text")}${field("Sessions (comma separated)", "tt-sessions", (c.problem.sessions || []).map((s) => s.name).join(", "), "text")}<button data-action="apply-timetable-basic" class="small-button">${icon("check")}Apply timetable</button></details><details class="advanced"><summary>Advanced dataset JSON</summary><label for="timetable-json">Slots, rooms, teachers, sessions</label><textarea id="timetable-json" rows="16" spellcheck="false">${e(JSON.stringify(c.problem, null, 2))}</textarea><button data-action="apply-timetable" class="small-button">${icon("check")}Apply JSON</button></details><p class="hint">Sessions share no teacher, group, or room in the same slot. Advanced JSON supports availability and allowed pair constraints.</p>`;
-  return `<summary class="panel-header"><div class="settings-title"><h3 class="with-icon">${icon("sliders-horizontal")}Problem settings</h3><small class="settings-current">${e(labels[c.algorithm])}</small></div><span class="settings-disclosure">${icon("caret-down")}<span>Edit settings</span></span></summary><div class="panel-body">${selectField("Algorithm", "algorithm", algorithms[lab], c.algorithm)}${extra}${lab !== "game" ? field(lab === "optimization" ? "Iteration limit" : "Search limit", "limit", c.limit, "number", 'min="1" max="1000000" step="1"') : ""}<p class="hint">${lab === "optimization" ? "20 paired seeded trials in comparisons." : "Comparisons use identical inputs, one warm-up, and five timed runs."} Reset before changing an active experiment.</p></div>`;
+  return `<summary class="panel-header"><div class="settings-title"><h3 class="with-icon">${icon("sliders-horizontal")}Problem settings</h3><small class="settings-current">${e(labels[c.algorithm])}</small></div><span class="settings-disclosure">${icon("caret-down")}<span>Edit settings</span></span></summary><div class="panel-body">${selectField("Algorithm", "algorithm", algorithms[lab], c.algorithm)}${extra}${lab !== "game" ? field(lab === "optimization" ? "Iteration limit" : "Search limit", "limit", c.limit, "number", 'min="1" max="1000000" step="1"') : ""}<p class="hint">${lab === "optimization" ? "20 paired seeded trials in comparisons." : "Comparisons use identical inputs, one warm-up, and five timed runs."} Changing a setting starts a fresh experiment automatically.</p></div>`;
 }
 function playbackHTML() {
-  return `<div class="playback"><div class="playback-buttons"><button id="run" class="primary" data-action="run">${icon("play")}<span class="button-text">Run</span></button><button id="pause" data-action="pause">${icon("pause")}Pause</button><button id="previous" data-action="previous">${icon("skip-back")}Previous</button><button id="next" data-action="next">${icon("skip-forward")}Next</button><button data-action="jump-prev">${icon("skip-back")}Key event</button><button data-action="jump-next">Key event ${icon("skip-forward")}</button><button id="reset" data-action="reset">${icon("arrow-counter-clockwise")}Reset</button><span class="step-count" id="step-count">Ready</span></div><div class="timeline"><div><label for="scrub">Recorded decisions <span id="event-progress">0</span></label><div class="timeline-track"><input type="range" id="scrub" min="0" max="0" value="0" aria-label="Seek a recorded step"><div id="timeline-markers" aria-hidden="true"></div></div><small id="trace-gap-label" class="hint"></small></div><div><label for="speed">Speed <span id="speed-label">${playback.speed} steps/s</span></label><input type="range" id="speed" min="1" max="30" value="${playback.speed}"></div></div><p class="playback-hint">Space play/pause · ← / → step · J / K previous/next key event</p></div>`;
+  return `<div class="playback"><div class="playback-buttons"><button id="run" class="primary" data-action="run">${icon("play")}<span class="button-text">Run</span></button><button id="pause" data-action="pause">${icon("pause")}Pause</button><button id="previous" data-action="previous">${icon("skip-back")}Previous</button><button id="next" data-action="next">${icon("skip-forward")}Next</button><button data-action="jump-prev">${icon("skip-back")}Key event</button><button data-action="jump-next">Key event ${icon("skip-forward")}</button><button id="reset" data-action="reset">Reset</button><span class="step-count" id="step-count">Ready</span></div><div class="timeline"><div><label for="scrub">Recorded decisions <span id="event-progress">0</span></label><div class="timeline-track"><input type="range" id="scrub" min="0" max="0" value="0" aria-label="Seek a recorded step"><div id="timeline-markers" aria-hidden="true"></div></div><small id="trace-gap-label" class="hint"></small></div><div><label for="speed">Speed <span id="speed-label">${playback.speed} steps/s</span></label><input type="range" id="speed" min="1" max="30" value="${playback.speed}"></div></div><p class="playback-hint">Space play/pause · ← / → step · J / K previous/next key event</p></div>`;
 }
 function visualHTML(frame) {
   if (busy && lab !== "pathfinding")
@@ -533,7 +548,7 @@ function guideHTML() {
       "https://inst.eecs.berkeley.edu/~cs188/textbook/csp/filtering.html",
     ],
   };
-  return `<details class="guide"><summary>Algorithm rules & correctness</summary><p>${text[lab]}</p><p><a href="${links[lab][1]}" target="_blank" rel="noopener">${links[lab][0]}${icon("arrow-up-right")}</a></p></details>`;
+  return `<details class="guide"><summary>Algorithm rules & correctness</summary><p>${text[lab]}</p><p><a href="${links[lab][1]}" target="_blank" rel="noopener">${links[lab][0]}</a></p></details>`;
 }
 function visualComparisonBoardsHTML() {
   if (!visualCompare) return "";
@@ -582,13 +597,12 @@ function syncPathfinding(frame) {
   if (!pfRenderer) return;
   app.setAttribute('aria-busy', String(busy));
   pfRenderer.update({c:cfg(),frame,selected,busy,zoom:gridZoom,playback,result});
-  const locked = busy || !!playback.steps.length;
   app.querySelectorAll('.pf-setup select, #pf-editor input:not(#grid-zoom), #pf-editor button, #pf-advanced [data-param]').forEach(el => {
-    const disabled = locked && el.dataset.brush !== 'inspect';
+    const disabled = false;
     if (el.disabled !== disabled) el.disabled = disabled;
   });
   pfDropdowns?.sync();
-  if (busy || playback.timer) pfTools?.back();
+
 }
 function renderPathfinding() {
   if (pfRendering) return;
@@ -636,6 +650,7 @@ function renderPathfindingContent() {
   for (const id of pathfindingOpenTools) document.getElementById(id)?.setAttribute('open','');
   pfTools = mountPathfindingTools(app.querySelector('.pf-page'), {
     initialMode:toolMode,
+    onShow:(id)=>{if(id==='pf-editor')discardExecution();syncPathfinding(playback.steps[playback.index]);updateControls();},
     pause:()=>playback.pause(),
     onInspect:()=>updateFrame(playback.steps[playback.index]),
     onLeaveEditor:()=>{
@@ -657,15 +672,14 @@ function renderPathfindingContent() {
 function syncNQueens(frame) {
   if(!nqRenderer||!app.querySelector('.nq-page'))return;
   nqRenderer.update({c:cfg(),frame,playback,busy,result});
-  const locked=busy||!!playback.steps.length;
-  app.querySelectorAll('.nq-setup input,.nq-setup select,.nq-setup .pf-number-step,#pf-editor input,#pf-editor button,#pf-advanced input[data-param],#pf-advanced .pf-number-step,[data-param="trialStarts"]').forEach(el=>el.disabled=locked);
+  app.querySelectorAll('.nq-setup input,.nq-setup select,.nq-setup .pf-number-step,#pf-editor input,#pf-editor button,#pf-advanced input[data-param],#pf-advanced .pf-number-step,[data-param="trialStarts"]').forEach(el=>el.disabled=false);
   app.querySelectorAll('.nq-page .pf-number-step').forEach(button=>{
     const input=button.parentElement.querySelector('input');
-    button.disabled=locked||(Number(button.dataset.numberStep)<0?Number(input.value)<=Number(input.min):Number(input.value)>=Number(input.max));
+    button.disabled=(Number(button.dataset.numberStep)<0?Number(input.value)<=Number(input.min):Number(input.value)>=Number(input.max));
   });
   app.querySelectorAll('.nq-page [data-action="compare"],.nq-page [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
   nqDropdowns?.sync();
-  if(busy||playback.timer)nqTools?.back();
+
 }
 function renderNQueens() {
   if(nqRendering)return;
@@ -687,10 +701,10 @@ function renderNQueens() {
       app.innerHTML=html();nqKey=key;nqExtras=extras;
       const root=app.querySelector('.nq-page');
       nqRenderer=mountNQueensRenderer(root,{edit:(row,col)=>{
-        if(busy||playback.steps.length)return;
+        discardExecution();
         const id=`nq-cell-${row}-${col}`;cfg().problem.queens[col]=row;cfg().arrangement='custom';comparison=null;visualCompare=null;persist();renderNQueens();document.getElementById(id)?.focus({preventScroll:true});
       }});
-      nqTools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncNQueens(playback.steps[playback.index]),onShow:()=>syncNQueens(playback.steps[playback.index]),onLeaveEditor:()=>{}});
+      nqTools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncNQueens(playback.steps[playback.index]),onShow:(id)=>{if(id==='pf-editor')discardExecution();syncNQueens(playback.steps[playback.index]);updateControls();},onLeaveEditor:()=>{}});
       if(compareOpen)nqTools.show('pf-comparisons');
       nqDropdowns=mountStudySelects(root);
       if(activeId)document.getElementById(activeId)?.focus({preventScroll:true});
@@ -701,14 +715,13 @@ function renderNQueens() {
 function syncGameStudy(frame) {
   if(!gameRenderer||!app.querySelector('.game-study'))return;
   gameRenderer.update({c:configs.game,frame,busy,result,playback});
-  const locked=busy||!!playback.steps.length;
   app.querySelectorAll('.game-setup select,#pf-advanced input,#pf-advanced select,#pf-advanced button').forEach(el=>{
     if(el.matches('[data-action="new-game"]'))return;
-    el.disabled=locked;
+    el.disabled=false;
   });
   app.querySelectorAll('.game-study [data-action="compare"],.game-study [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
   gameDropdowns?.sync();
-  if(busy||playback.timer)gameTools?.back();
+
 }
 function renderGameStudy() {
   if(gameRendering)return;
@@ -748,11 +761,10 @@ function syncSudoku(frame) {
   if(!sudokuUI.renderer||!app.querySelector('.sudoku-study'))return;
   app.setAttribute('aria-busy',String(busy));
   sudokuUI.renderer.update({c:cfg(),frame,playback,busy,result,editing:sudokuUI.tools?.mode==='pf-editor'});
-  const locked=busy||!!playback.steps.length;
-  app.querySelectorAll('.sudoku-study .pf-setup select,.sudoku-study [data-param],.sudoku-study .pf-number-step,.sudoku-study [data-action="clear-sudoku"]').forEach(el=>el.disabled=locked);
+  app.querySelectorAll('.sudoku-study .pf-setup select,.sudoku-study [data-param],.sudoku-study .pf-number-step,.sudoku-study [data-action="clear-sudoku"]').forEach(el=>el.disabled=false);
   app.querySelectorAll('.sudoku-study [data-action="compare"],.sudoku-study [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
   sudokuUI.dropdowns?.sync();
-  if(busy||playback.timer)sudokuUI.tools?.back();
+
 }
 function renderSudoku() {
   if(sudokuUI.rendering)return;
@@ -772,7 +784,7 @@ function renderSudoku() {
       sudokuUI.tools?.destroy();sudokuUI.dropdowns?.destroy();sudokuUI.renderer?.destroy();
       app.innerHTML=html();sudokuUI.key=key;sudokuUI.extras=extras;
       const root=app.querySelector('.sudoku-study');sudokuUI.renderer=mountSudokuRenderer(root);
-      sudokuUI.tools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncSudoku(playback.steps[playback.index]),onShow:()=>syncSudoku(playback.steps[playback.index]),onLeaveEditor:()=>syncSudoku(playback.steps[playback.index])});
+      sudokuUI.tools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncSudoku(playback.steps[playback.index]),onShow:(id)=>{if(id==='pf-editor')discardExecution();syncSudoku(playback.steps[playback.index]);updateControls();},onLeaveEditor:()=>syncSudoku(playback.steps[playback.index])});
       root.querySelector('.pf-dialog-heading p').textContent='The same puzzle. Different search decisions.';
       if(compareOpen)sudokuUI.tools.show('pf-comparisons');
       sudokuUI.dropdowns=mountStudySelects(root);
@@ -785,12 +797,11 @@ function syncTimetable(frame) {
   if(!timetableUI.renderer||!app.querySelector('.timetable-study'))return;
   app.setAttribute('aria-busy',String(busy));
   timetableUI.renderer.update({c:cfg(),frame,playback,busy,result});
-  const locked=busy||!!playback.steps.length;
-  app.querySelectorAll('.timetable-study .pf-setup select,.timetable-study [data-param],.timetable-study .pf-number-step').forEach(el=>el.disabled=locked);
+  app.querySelectorAll('.timetable-study .pf-setup select,.timetable-study [data-param],.timetable-study .pf-number-step').forEach(el=>el.disabled=false);
   app.querySelectorAll('.timetable-study [data-action="compare"],.timetable-study [data-action="compare-visual"]').forEach(el=>el.disabled=busy);
-  app.querySelectorAll('.timetable-study #timetable-upload,.timetable-study #timetable-json,.timetable-study [data-action="apply-timetable"]').forEach(el=>el.disabled=busy);
+  app.querySelectorAll('.timetable-study #timetable-upload,.timetable-study #timetable-json,.timetable-study [data-action="apply-timetable"]').forEach(el=>el.disabled=false);
   timetableUI.dropdowns?.sync();
-  if(busy||playback.timer)timetableUI.tools?.back();
+
 }
 function renderTimetable() {
   if(timetableUI.rendering)return;
@@ -810,7 +821,7 @@ function renderTimetable() {
       timetableUI.tools?.destroy();timetableUI.dropdowns?.destroy();timetableUI.renderer?.destroy();
       app.innerHTML=html();timetableUI.key=key;timetableUI.extras=extras;
       const root=app.querySelector('.timetable-study');timetableUI.renderer=mountTimetableRenderer(root);
-      timetableUI.tools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncTimetable(playback.steps[playback.index]),onShow:()=>syncTimetable(playback.steps[playback.index]),onLeaveEditor:()=>syncTimetable(playback.steps[playback.index])});
+      timetableUI.tools=mountPathfindingTools(root,{initialMode:mode,pause:()=>playback.pause(),onInspect:()=>syncTimetable(playback.steps[playback.index]),onShow:(id)=>{if(id==='pf-editor')discardExecution();syncTimetable(playback.steps[playback.index]);updateControls();},onLeaveEditor:()=>syncTimetable(playback.steps[playback.index])});
       root.querySelector('.pf-dialog-heading p').textContent='The same constraints. Different search decisions.';
       if(compareOpen)timetableUI.tools.show('pf-comparisons');
       timetableUI.dropdowns=mountStudySelects(root);
@@ -841,13 +852,12 @@ function renderLab() {
     visualCompare?.right.algorithm ||
       algPair.find((a) => a !== cfg().algorithm),
   )}</select></label><button data-action="compare-visual" ${busy ? "disabled" : ""}>Compare visual traces</button></div><div id="error-slot" role="alert"></div><div class="lab-layout"><details class="panel settings" ${settingsExpanded ? "open" : ""}>${settingsHTML()}</details><section><div class="work-grid"><div class="panel stage"><div class="panel-header"><h2>${lab === "game" ? "Board & decision tree" : lab === "sudoku" ? "Constraint board" : lab === "timetable" ? "Session placements" : lab === "optimization" ? "The search landscape" : "Search map"}</h2><span id="run-status" class="${busy ? "busy-indicator" : "result-status"}">${busy ? "Computing" : playback.steps.length ? "Recorded playback" : "Ready"}</span></div><div class="canvas-area" id="visualization">${visualHTML(frame)}</div>${playbackHTML()}${result?.traceSkipped ? `<div class="trace-warning">${result.traceSkipped.toLocaleString()} events omitted after the trace cap. Playback holds a partial trace; final outcome and full metrics are shown separately.</div>` : ""}</div><aside class="panel explanation"><div class="panel-header"><h3 class="with-icon">${icon("note-pencil")}Decision notebook</h3></div><div class="panel-body" id="explanation">${explanationHTML(lab, c, frame, selected)}${lessonHTML(lab, result, frame)}</div></aside></div><section class="panel results"><div class="panel-header"><h3 class="with-icon">${icon("chart-bar")}Experiment results</h3><span id="result-status" class="result-status ${result && result.status !== "solved" && result.status !== "terminal" ? "warning" : ""}">${e(result?.status?.replaceAll("-", " ") || "Not run")}</span></div><div class="panel-body"><p class="replay-state">${frame ? `Replay position: ${playback.index + 1} of ${playback.steps.length} · ${e(frame.event?.replaceAll("-", " ") || "recorded decision")}` : "No replay frame selected"}${result ? ` · Final engine outcome: ${e(result.status)}` : ""}</p><div class="metrics" id="metrics">${metricsHTML(lab, frame ? frame.metrics : {})}</div>${result ? `<div class="final-run-metrics"><h4>Complete run · final engine metrics</h4><div class="metrics">${metricsHTML(lab, result.metrics)}</div></div>` : ""}<p class="status-note" id="result-note">${result ? "Replay counts follow the selected trace frame. Final outcome and complete-run timing remain available above." : "Results will appear here after a real algorithm run."}</p>${visualComparisonHTML()}${comparison ? comparisonHTML(comparison) : ""}${guideHTML()}</div></section></section></div><span id="playback-live" class="sr-only" aria-live="polite" aria-atomic="true"></span>`;
-  const locked = busy || !!playback.steps.length;
   app
     .querySelectorAll(
       ".settings input,.settings select,.settings textarea,.settings button",
     )
     .forEach((el) => {
-      el.disabled = locked && el.dataset.brush !== "inspect";
+      el.disabled = false;
     });
   if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true });
   updateControls();
@@ -894,20 +904,21 @@ function dashboard() {
           }
           <button data-action="dashboard-compare" class="primary">${icon("chart-bar")}Run comparison</button>
         </div>
-        ${chosen ? `<div id="comparison-chart">${comparisonChart(chosen, metricKeys[dashboardLab][0])}</div>${comparisonHTML(chosen)}` : `<div class="empty-state">${icon("chart-bar")}<div><strong>No comparison recorded.</strong>Choose a lab and run its algorithms on the same input.</div></div>`}
+        ${chosen ? `<div id="comparison-chart">${comparisonChart(chosen, metricKeys[dashboardLab][0])}</div>${comparisonHTML(chosen)}` : `<div class="sd-comparison-guide"><h3>See the trade-offs.</h3><p>Run the algorithms on an identical input to discover where their approaches differ.</p><dl><div><dt>Search effort</dt><dd>How much work each algorithm performs.</dd></div><div><dt>Solution quality</dt><dd>The result each approach reaches on your problem.</dd></div><div><dt>Computation time</dt><dd>Measured execution time, separate from playback.</dd></div></dl><span class="sd-panel-note">Choose a lab above to record your first comparison.</span></div>`}
       </div></div>
     </section>
 `;
   const historyPanel = `
     <section class="dashboard-section">
-      <div class="section-title"><div><h2 class="with-icon">${icon("clock-counter-clockwise")}Experiment history</h2><p class="section-intro">Revisit an input or export your results.</p></div><div class="heading-actions"><button data-action="import" class="small-button">${icon("upload-simple")}Import JSON</button><button data-action="export" class="small-button">${icon("download-simple")}Export JSON</button><button data-action="clear-history" class="small-button danger">${icon("trash")}Clear history</button>${historyUndo ? `<button data-action="undo-clear" class="small-button">${icon("arrow-counter-clockwise")}Undo clear</button>` : ""}</div></div>
+      <div class="section-title"><div><h2 class="with-icon">${icon("clock-counter-clockwise")}Experiment history</h2><p class="section-intro">Revisit an input or export your results.</p></div><div class="heading-actions"><button data-action="import" class="small-button">Import JSON</button><button data-action="export" class="small-button">Export JSON</button><button data-action="clear-history" class="small-button danger">${icon("trash")}Clear history</button>${historyUndo ? `<button data-action="undo-clear" class="small-button">Undo clear</button>` : ""}</div></div>
+      <div class="sd-history-overview"><div><strong>${data.history.filter(h => h.type === 'configuration').length}</strong><span>Saved setups</span></div><div><strong>${data.history.filter(h => h.type !== 'configuration' && h.type !== 'comparison').length}</strong><span>Algorithm runs</span></div><div><strong>${data.history.filter(h => h.type === 'comparison').length}</strong><span>Comparisons</span></div></div>
       <div class="panel">${
         data.history.length
           ? `
         <div class="table-wrap"><table class="history-table"><thead><tr><th>When</th><th>Laboratory</th><th>Experiment</th><th>Outcome</th><th>Revisit</th></tr></thead><tbody>
-          ${data.history.map((h) => `<tr><td>${e(new Date(h.date).toLocaleString())}</td><td>${labNames[h.lab]}</td><td>${h.type === "comparison" ? `${h.results.length} algorithms compared` : h.type === "configuration" ? (h.name ? `Setup · ${e(h.name)}` : "Saved configuration") : e(labels[h.algorithm])}</td><td>${e(h.status || "recorded")}</td><td><button data-restore="${h.id}">${icon("arrow-up-right")}Load input</button></td></tr>`).join("")}
+          ${data.history.map((h) => `<tr><td>${e(new Date(h.date).toLocaleString())}</td><td>${labNames[h.lab]}</td><td>${h.type === "comparison" ? `${h.results.length} algorithms compared` : h.type === "configuration" ? (h.name ? `Setup · ${e(h.name)}` : "Saved configuration") : e(labels[h.algorithm])}</td><td>${e(h.status || "recorded")}</td><td><button data-restore="${h.id}">Load input</button></td></tr>`).join("")}
         </tbody></table></div>`
-          : `<div class="empty-state history-empty">${icon("bookmark-simple")}<div><strong>No experiments saved.</strong>Run an algorithm or save a setup in any lab to begin.</div></div>`
+          : `<div class="sd-history-guide"><h3>Your next discovery starts here.</h3><p>Run an algorithm or save a setup in any lab. Your experiments will appear here automatically.</p><ul><li><strong>Return to the same problem</strong><span>Load a saved input and explore another approach.</span></li><li><strong>Take your work with you</strong><span>Export your experiments as JSON or import a collection.</span></li></ul><a class="sd-text-link" href="#pathfinding">Start a pathfinding experiment</a></div>`
       }
       </div>
     </section>
@@ -1018,7 +1029,7 @@ function updateControls() {
   const resetLabel = busy ? "Cancel computation" : "Reset";
   if (get("reset").textContent !== resetLabel)
     get("reset").innerHTML =
-      icon(busy ? "stop" : "arrow-counter-clockwise") + resetLabel;
+      (busy ? icon("stop") : "") + resetLabel;
   get("step-count").textContent = busy
     ? "Computing…"
     : has
@@ -1239,7 +1250,6 @@ function compareVisual() {
   notify("Computing independent traces for the same input…");
 }
 function updateSetting(key, value) {
-  if (busy || playback.steps.length) return;
   const c = cfg();
   if (key === "algorithm") c.algorithm = value;
   else if (key === "preset") {
@@ -1342,6 +1352,7 @@ function updateSetting(key, value) {
   else if (key === "position") {
     if (value === "custom") {
       c.position = value;
+      discardExecution();
       persist();
       renderLab();
       return;
@@ -1375,6 +1386,7 @@ function updateSetting(key, value) {
     c.dataset = value;
   }
   if (["size", "seed"].includes(key)) c.arrangement = "random";
+  discardExecution();
   comparison = null;
   visualCompare = null;
   persist();
@@ -1383,11 +1395,12 @@ function updateSetting(key, value) {
 }
 function paint(id) {
   const p = cfg().problem;
-  if (brush === "inspect" || playback.steps.length || busy) {
+  if (brush === "inspect") {
     selected = id;
     updateFrame(playback.steps[playback.index]);
     return false;
   }
+  if (busy || playback.steps.length) discardExecution();
   if (brush === "start" || brush === "goal") {
     if (id === p[brush === "start" ? "goal" : "start"]) {
       notify("Start and goal need separate cells in the editor.");
@@ -1632,7 +1645,6 @@ app.addEventListener("click", (event) => {
   }
   if (action === "import") document.getElementById("import-config")?.click();
   if (action === "apply-queens") {
-    if(busy||playback.steps.length)return;
     const values = document
         .getElementById("queen-rows")
         .value.split(/[\s,]+/)
@@ -1646,19 +1658,20 @@ app.addEventListener("click", (event) => {
       notify(`Enter ${n} row numbers between 1 and ${n}.`);
       return;
     }
+    discardExecution();
     cfg().problem.queens = values;
     cfg().arrangement = "custom";
     persist();
     renderLab();
   }
   if (action === "clear-sudoku") {
-    if(busy||playback.steps.length)return;
+    discardExecution();
     cfg().problem.board.fill(0);
     cfg().puzzle = "custom";
     persist();
     renderLab();
   }
-  if(action==='apply-timetable'&&lab==='timetable'&&!busy){
+  if(action==='apply-timetable'&&lab==='timetable'){
     try{applyTimetableJSON(document.getElementById('timetable-json').value,false);}catch(error){document.getElementById('tt-upload-message').textContent=error.message;}
   }
   if(action==='tt-template')downloadJSONFile(timetablePreset(),'algoai-timetable-example.json');
@@ -1718,7 +1731,9 @@ document.addEventListener("change", async (event) => {
   const el = event.target;
   if (lab === "question-visualizer" && el.closest(".qv-workspace")) return;
   if(el.id==='timetable-upload'&&lab==='timetable'){
-    const file=el.files?.[0],ticket=++timetableUploadId,revision=requestId;if(!file||busy)return;
+    const file=el.files?.[0];if(!file)return;
+    discardExecution();
+    const ticket=++timetableUploadId,revision=requestId;
     try{
       if(file.size>262144)throw Error('Choose a JSON file smaller than 256 KB.');
       const text=await file.text();if(ticket!==timetableUploadId||revision!==requestId||lab!=='timetable')return;
@@ -1751,18 +1766,19 @@ document.addEventListener("change", async (event) => {
     updateSetting("algorithm", el.checked ? "alphabeta" : "minimax");
   if (el.dataset.param) updateSetting(el.dataset.param, el.value);
   if (el.dataset.sudoku !== undefined) {
-    if(busy||playback.steps.length||sudokuUI.tools?.mode!=="pf-editor")return;
+    if(sudokuUI.tools?.mode!=="pf-editor")return;
     const text = el.value.trim();
     if (!/^[0-9]?$/.test(text)) {
       el.value = "";
       notify("Use one digit from 1 to 9, or blank.");
       return;
     }
+    if(busy||playback.steps.length)discardExecution();
     cfg().problem.board[+el.dataset.sudoku] = Number(text) || 0;
     cfg().puzzle = "custom";
     document.getElementById("puzzle").value = "custom";
     persist();
-    sudokuUI.key=JSON.stringify(cfg());syncSudoku(null);
+    sudokuUI.key=JSON.stringify(cfg());syncSudoku(null);updateControls();
   }
   if (
     el.id === "visual-alg-a" &&
